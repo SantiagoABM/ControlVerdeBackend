@@ -15,7 +15,7 @@ const insertarProducto = async (req, res) => {
 const insertarLote = async (req, res) => {
   try {
     const productos = req.body.productos;
-    console.log(`Productos recibidos: ${JSON.stringify(productos.JSON)}`);
+    console.log('Lote recibido:', JSON.stringify(req.body));
     if (!Array.isArray(productos)) {
       return res.status(400).json({ error: 'Se esperaba un arreglo de productos' });
     }
