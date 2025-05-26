@@ -6,6 +6,6 @@ const productoController = require('../controllers/productoController.js');
 router.post('/agregar', productoController.insertarProducto);
 router.post('/lote', productoController.insertarLote);
 router.get('/buscar/:codigo', productoController.buscarProducto);
-
+router.post('/by-skus', productoController.getProductosBySkus);
 
 module.exports = router;

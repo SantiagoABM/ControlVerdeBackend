@@ -28,8 +28,17 @@ async function insertarProductosEnLote(productos) {
     return await Producto.insertMany(productos, { ordered: false });
 }
 
+const getProductosBySkus = async (skus) => {
+    return await Producto.find(
+        { sku: { $in: skus } },
+        'sku ean costoPromedio precioVigente uMedida' // Solo estos campos
+    );
+};
+
+
 module.exports = {
     insertarProducto,
     buscarProductoPorCodigo,
-    insertarProductosEnLote
+    insertarProductosEnLote,
+    getProductosBySkus
 };

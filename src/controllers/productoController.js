@@ -48,8 +48,25 @@ const buscarProducto = async (req, res) => {
     }
 };
 
+const getProductosBySkus = async (req, res) => {
+  const { skus } = req.body;
+
+  if (!Array.isArray(skus)) {
+    return res.status(400).json({ message: 'SKUs inválidos' });
+  }
+
+  try {
+    const productos = await productoService.getProductosBySkus(skus);
+    res.status(200).json(productos);
+  } catch (error) {
+    console.error('Error en getProductosBySkus:', error);
+    res.status(500).json({ message: 'Error al obtener productos' });
+  }
+};
+
 module.exports = {
     insertarProducto,
     buscarProducto,
-    insertarLote
+    insertarLote,
+    getProductosBySkus
 };
