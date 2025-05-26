@@ -20,7 +20,7 @@ const insertarLote = async (req, res) => {
       return res.status(400).json({ error: 'Se esperaba un arreglo de productos' });
     }
 
-    const insertados = await productoService.insertarProducto(productos);
+    const insertados = await productoService.insertarProductosEnLote(productos);
     res.status(201).json({ message: 'Lote insertado', total: insertados.length });
   } catch (error) {
     console.error('Error al insertar lote:', error);

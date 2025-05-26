@@ -24,11 +24,17 @@ async function buscarProductoPorCodigo(codigo) {
     return producto;
 }
 
-const insertarLote = async (productos) => {
-    return await Producto.insertMany(productos, { ordered: false });
+const insertarProductosEnLote = async (productos) => {
+    try {
+        return await Producto.insertMany(productos, { ordered: false });
+    } catch (error) {
+        console.error('Error al insertar productos en lote:', error);
+        throw error;
+    }
 };
+
 module.exports = {
     insertarProducto,
     buscarProductoPorCodigo,
-    insertarLote
+    insertarProductosEnLote
 };
