@@ -23,7 +23,12 @@ async function buscarProductoPorCodigo(codigo) {
 
     return producto;
 }
+
+const insertarLote = async (productos) => {
+    return await Producto.insertMany(productos, { ordered: false });
+};
 module.exports = {
     insertarProducto,
-    buscarProductoPorCodigo
+    buscarProductoPorCodigo,
+    insertarLote
 };

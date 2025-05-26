@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 
 const productoSchema = new mongoose.Schema({
-  sku: String,
+  sku: {
+    type: String,
+    unique: true,
+  },
   ean: String,
   subdpto: String,
   descripcion: String,

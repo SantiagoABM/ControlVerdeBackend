@@ -12,6 +12,23 @@ const insertarProducto = async (req, res) => {
   }
 };
 
+const insertarLote = async (req, res) => {
+  try {
+    const productos = req.body.productos;
+
+    if (!Array.isArray(productos)) {
+      return res.status(400).json({ error: 'Se esperaba un arreglo de productos' });
+    }
+
+    const insertados = await productoService.insertarProducto(productos);
+    res.status(201).json({ message: 'Lote insertado', total: insertados.length });
+  } catch (error) {
+    console.error('Error al insertar lote:', error);
+    res.status(500).json({ error: 'Error en la inserción del lote', detalle: error.message });
+  }
+};
+
+
 const buscarProducto = async (req, res) => {
   const { codigo } = req.params;
 
@@ -32,5 +49,6 @@ const buscarProducto = async (req, res) => {
 
 module.exports = {
   insertarProducto,
-  buscarProducto
+  buscarProducto,
+  insertarLote
 };
