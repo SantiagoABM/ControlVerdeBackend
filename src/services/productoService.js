@@ -26,6 +26,8 @@ async function buscarProductoPorCodigo(codigo) {
 
 const insertarProductosEnLote = async (productos) => {
     try {
+        console.log('Lote recibido:', JSON.stringify(productos));
+
         return await Producto.insertMany(productos, { ordered: false });
     } catch (error) {
         console.error('Error al insertar productos en lote:', error);
