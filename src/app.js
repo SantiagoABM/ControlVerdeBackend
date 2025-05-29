@@ -6,6 +6,8 @@ const pkg = require('../package.json');
 const helmet = require("helmet");
 //rutas
 const productoRoute = require("./routes/productoRoute.js");
+const reporteRoute = require("./routes/reporteRoute.js");
+const detalleReporteRoute = require("./routes/detalleReporteRoute.js");
 
 
 const app = express();
@@ -26,5 +28,8 @@ app.use(express.urlencoded({ extend: false }));
 
 //rutas
 app.use("/api/productos", productoRoute);
+app.use("/api/reportes", reporteRoute);
+app.use("/api/detallereportes", detalleReporteRoute);
+
 
 module.exports = app;
