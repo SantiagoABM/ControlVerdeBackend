@@ -7,7 +7,7 @@ async function insertarReporte(data) {
 
 async function buscarReportePorMotivo(motivo) {
     if (!motivo) throw new Error('Motivo requerido');
-    const reportes = await Producto.find(
+    const reportes = await Reporte.find(
         { motivo: { $regex: motivo, $options: 'i' } },
         { tim: 1, _id: 0 } // Solo devuelve el campo `tim`
     );

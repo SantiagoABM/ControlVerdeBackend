@@ -14,8 +14,9 @@ const insertarReporte = async (req, res) => {
 const buscarPorMotivo = async (req, res) => {
     try {
         const { motivo } = req.query;
+        console.log('Motivo recibido:', motivo);
 
-        const resultados = await productoService.buscarReportePorMotivo(motivo);
+        const resultados = await reporteService.buscarReportePorMotivo(motivo);
         res.status(200).json(resultados);
     } catch (error) {
         res.status(400).json({ error: error.message });
