@@ -9,12 +9,21 @@ async function buscarReportePorMotivo(motivo) {
     if (!motivo) throw new Error('Motivo requerido');
     const reportes = await Reporte.find(
         { motivo: { $regex: motivo, $options: 'i' } },
-        { tim: 1, _id: 0 } // Solo devuelve el campo `tim`
+        { tim: 1, _id: 0 } 
     );
     return reportes.map(r => r.tim);
 }
 
+async function buscarReporte(reporte) {
+    if (!reporte) throw new Error('Código Tim requerido');
+    const report = await Reporte.findOne(
+        { tim:  reporte }
+    );
+    return report;
+}
+
 module.exports = {
     insertarReporte,
-    buscarReportePorMotivo
+    buscarReportePorMotivo,
+    buscarReporte
 };
