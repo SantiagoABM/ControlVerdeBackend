@@ -63,6 +63,7 @@ const getProductosBySkus = async (req, res) => {
   }
 };
 
+
 module.exports = {
     insertarProducto,
     buscarProducto,

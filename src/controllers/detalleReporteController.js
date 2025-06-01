@@ -15,47 +15,57 @@ const insertarDetalleReporte = async (req, res) => {
 
 const insertarLote = async (req, res) => {
     try {
-        const detalleReportes = req.body;
-        console.log('Lote recibido:', JSON.stringify(detalleReportes.length));
+        const detalleReporte = req.body;
+        console.log('Lote recibido:', detalleReporte.length);
 
-        if (!detalleReportes || !Array.isArray(detalleReportes) || detalleReportes.length === 0) {
+        if (!detalleReporte || !Array.isArray(detalleReporte) || detalleReporte.length === 0) {
             return res.status(400).json({ error: 'Se esperaba un arreglo de los detalles del reporte' });
         }
 
-        // 1. Obtener todos los SKUs únicos del lote
-        const skus = [...new Set(detalleReportes.map(p => p.sku))];
+        // 1. Obtener SKUs únicos del lote
+        const skusUnicos = [...new Set(detalleReporte.map(p => p.sku))];
 
-        // 2. Buscar qué productos ya existen
-        const productosExistentes = await productoService.buscarProductosPorSkus;
+        // 2. Buscar los productos ya existentes
+        const productosExistentes = await productoService.validateSkus(skusUnicos);
         const skusExistentes = new Set(productosExistentes.map(p => p.sku));
 
-        // 3. Preparar productos nuevos que no existen aún
-        const nuevosProductos = detalleReportes
-            .filter(p => !skusExistentes.has(p.sku))
-            .map(p => ({
-                sku: p.sku,
-                descripcion: p.descripcion || '',
-                categoria: p.categoria || null,
-                validado: false,
-                creadoEn: new Date(),
-                fuente: 'reporteExcel'
-            }));
+        // 3. Crear un mapa SKU -> datos (solo para los que no existen aún)
+        const nuevosProductosMap = new Map();
 
-        // 4. Insertar productos nuevos si hay alguno
-        if (nuevosProductos.length > 0) {
-            await productoService.insertarProductosEnLote(nuevosProductos);
-            console.log(`Se insertaron ${nuevosProductos.length} nuevos productos.`);
+        for (const detalle of detalleReporte) {
+            if (!skusExistentes.has(detalle.sku) && !nuevosProductosMap.has(detalle.sku)) {
+                nuevosProductosMap.set(detalle.sku, {
+                    sku: detalle.sku,
+                    descripcion: detalle.descripcion || '',
+                    ean: detalle.ean || '',
+                    marca: detalle.marca || '',
+                    proveedor: detalle.proveedor || '',
+                    subdpto: detalle.subdpto || '',
+                    casePack: detalle.casePack || 1,
+                    costoPromedio: detalle.costoPromedio || 0.0,
+                    precioVigente: detalle.precioVigente || 0.0,
+                    uMedida: detalle.uMedida || '',
+                });
+            }
         }
 
-        // 5. Insertar los detalles del reporte
-        const insertados = await detalleReporteService.insertarDetalleReporteEnLote(detalleReportes);
+        // 4. Insertar productos nuevos si hay
+        const nuevosProductos = Array.from(nuevosProductosMap.values());
+        if (nuevosProductos.length > 0) {
+            await Producto.insertMany(nuevosProductos, { ordered: false });
+            console.log(`✅ Se insertaron ${nuevosProductos.length} nuevos productos.`);
+        }
 
-        res.status(201).json({ message: 'Lote insertado', total: insertados.length });
+        // 5. Insertar detalles del reporte en lote
+        const insertados = await detalleReporteService.insertarDetalleReporteEnLote(detalleReporte);
+
+        res.status(201).json({ message: 'Lote insertado correctamente', total: insertados.length });
     } catch (error) {
-        console.error('Error al insertar lote:', error);
+        console.error('❌ Error al insertar lote:', error);
         res.status(500).json({ error: 'Error en la inserción del lote', detalle: error.message });
     }
 };
+
 
 const obtenerDetallesConProducto = async (req, res) => {
     try {

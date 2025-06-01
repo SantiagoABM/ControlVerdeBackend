@@ -35,10 +35,14 @@ const getProductosBySkus = async (skus) => {
     );
 };
 
+const validateSkus = async (skus) => {
+    return await Producto.find({ sku: { $in: skusUnicos } }).select('sku');
+};
 
 module.exports = {
     insertarProducto,
     buscarProductoPorCodigo,
     insertarProductosEnLote,
     getProductosBySkus,
+    validateSkus
 };
