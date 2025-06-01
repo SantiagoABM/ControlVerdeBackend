@@ -40,5 +40,5 @@ module.exports = {
     insertarProducto,
     buscarProductoPorCodigo,
     insertarProductosEnLote,
-    getProductosBySkus
+    getProductosBySkus,
 };

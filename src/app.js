@@ -25,7 +25,6 @@ app.use(morgan('dev'));
 app.use(cors());
 app.use(express.urlencoded({ extend: false }));
 
-
 //rutas
 app.use("/api/productos", productoRoute);
 app.use("/api/reportes", reporteRoute);
