@@ -39,7 +39,7 @@ const obtenerDetallesConProductoService = async (tim) => {
                 olpn: 1,
                 sku: 1,
                 ean: { $ifNull: ['$productoInfo.ean', ''] },
-                subdpto: { $ifNull: ['$productoInfo.supdpto', ''] },
+                subdpto: { $ifNull: ['$productoInfo.subdpto', ''] },
                 descripcion: { $ifNull: ['$productoInfo.descripcion', ''] },
                 casePack: { $ifNull: ['$productoInfo.casePack', ''] },
                 uMedida: { $ifNull: ['$productoInfo.uMedida', ''] },
