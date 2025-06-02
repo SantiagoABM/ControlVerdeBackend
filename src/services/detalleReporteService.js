@@ -35,7 +35,6 @@ const obtenerDetallesConProductoService = async (tim) => {
         },
         {
             $project: {
-                id: '$_id', // opcional si lo quieres como id
                 tim: 1,
                 olpn: 1,
                 sku: 1,
