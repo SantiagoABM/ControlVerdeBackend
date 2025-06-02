@@ -105,6 +105,37 @@ const obtenerDetallesConProducto = async (req, res) => {
     }
 };
 
+const actualizarRecibidosPorId = async (req, res) => {
+    try {
+        const {_id , uRecibidas} = req.body;
+
+    } catch (error) {
+
+    }
+}
+
+async function updateRecibidos(id, unidadesRecibidas) {
+    try {
+        const result = await Reporte.findByIdAndUpdate(
+            id,
+            { uRecibidas: unidadesRecibidas },
+            { new: true } // devuelve el documento actualizado
+        );
+
+        if (!result) {
+            console.log('❌ No se encontró el reporte con ese ID');
+            return false;
+        }
+
+        console.log('✅ Reporte actualizado:', result);
+        return result;
+    } catch (error) {
+        console.error('❌ Error al actualizar uRecibidas:', error);
+        return false;
+    }
+}
+
+
 const obtenerDetalleProducto = async (req, res) => {
     try {
         const { tim } = req.params;

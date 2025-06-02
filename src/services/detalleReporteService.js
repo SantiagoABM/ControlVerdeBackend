@@ -1,7 +1,7 @@
 const DetalleReporte = require('../models/DetalleReporte.js');
 
-async function insertarDetalleReporte(skus) {
-    return await Producto.find({ sku: { $in: skus } }).select('sku');
+async function insertarDetalleReporte(detalleReporte) {
+    return await DetalleReporte.insertOne(detalleReporte);
 }
 
 async function insertarDetalleReporteEnLote(detalleReportes) {
