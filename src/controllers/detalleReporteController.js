@@ -1,5 +1,8 @@
 const detalleReporteService = require('../services/detalleReporteService.js');
 const productoService = require('../services/productoService.js');
+const Producto = require('../models/Producto.js');
+const DetalleReporte = require('../models/DetalleReporte.js');
+
 
 
 const insertarDetalleReporte = async (req, res) => {
@@ -13,56 +16,81 @@ const insertarDetalleReporte = async (req, res) => {
     }
 };
 
-const insertarLote = async (req, res) => {
+const insertarLoteReporte = async (req, res) => {
     try {
-        const detalleReporte = req.body;
-        console.log('Lote recibido:', detalleReporte.length);
+        const reportes = req.body;
 
-        if (!detalleReporte || !Array.isArray(detalleReporte) || detalleReporte.length === 0) {
-            return res.status(400).json({ error: 'Se esperaba un arreglo de los detalles del reporte' });
+        if (!Array.isArray(reportes) || reportes.length === 0) {
+            return res.status(400).json({ error: 'Se requiere un arreglo de reportes' });
         }
 
-        // 1. Obtener SKUs únicos del lote
-        const skusUnicos = [...new Set(detalleReporte.map(p => p.sku))];
-
-        // 2. Buscar los productos ya existentes
-        const productosExistentes = await productoService.validateSkus(skusUnicos);
+        const skusLote = reportes.map(r => r.sku);
+        const productosExistentes = await Producto.find({ sku: { $in: skusLote } }, { sku: 1 }).lean();
         const skusExistentes = new Set(productosExistentes.map(p => p.sku));
 
-        // 3. Crear un mapa SKU -> datos (solo para los que no existen aún)
-        const nuevosProductosMap = new Map();
+        const nuevosProductos = [];
+        const detalles = [];
 
-        for (const detalle of detalleReporte) {
-            if (!skusExistentes.has(detalle.sku) && !nuevosProductosMap.has(detalle.sku)) {
-                nuevosProductosMap.set(detalle.sku, {
-                    sku: detalle.sku,
-                    descripcion: detalle.descripcion || '',
-                    ean: detalle.ean || '',
-                    marca: detalle.marca || '',
-                    proveedor: detalle.proveedor || '',
-                    subdpto: detalle.subdpto || '',
-                    casePack: detalle.casePack || 1,
-                    costoPromedio: detalle.costoPromedio || 0.0,
-                    precioVigente: detalle.precioVigente || 0.0,
-                    uMedida: detalle.uMedida || '',
+        for (const r of reportes) {
+            const {
+                sku, ean, subdpto, descripcion, casePack,
+                costoPromedio, precioVigente, uMedida,
+                tim, olpn, uEnviadas, uRecibidas,
+                fechavencimiento, observacion, fastRegister
+            } = r;
+
+            // Crear nuevo producto si no existe
+            if (!skusExistentes.has(sku)) {
+                nuevosProductos.push({
+                    sku,
+                    ean: ean ?? '',
+                    subdpto: subdpto ?? '',
+                    descripcion: descripcion ?? '',
+                    marca: '',
+                    proveedor: '',
+                    casePack: casePack ?? 0,
+                    costoPromedio: costoPromedio ?? 0,
+                    precioVigente: precioVigente ?? 0,
+                    uMedida: uMedida ?? '',
                 });
+                skusExistentes.add(sku); // evitar repetirlo si viene más veces
             }
+
+            // Crear detalleReporte
+            detalles.push({
+                tim,
+                olpn,
+                sku,
+                uEnviadas,
+                uRecibidas,
+                fechavencimiento: fechavencimiento ?? '',
+                observacion: observacion ?? 'PERTENECE',
+                fastRegister: fastRegister ?? false,
+            });
         }
 
-        // 4. Insertar productos nuevos si hay
-        const nuevosProductos = Array.from(nuevosProductosMap.values());
+        // Insertar nuevos productos
         if (nuevosProductos.length > 0) {
-            await Producto.insertMany(nuevosProductos, { ordered: false });
-            console.log(`✅ Se insertaron ${nuevosProductos.length} nuevos productos.`);
+            await Producto.insertMany(nuevosProductos, { ordered: false }).catch(err => {
+                console.warn('⚠️ Algunos productos ya existían o fallaron:', err.message);
+            });
         }
 
-        // 5. Insertar detalles del reporte en lote
-        const insertados = await detalleReporteService.insertarDetalleReporteEnLote(detalleReporte);
+        // Insertar detalles del reporte
+        if (detalles.length > 0) {
+            await DetalleReporte.insertMany(detalles, { ordered: false });
+        }
 
-        res.status(201).json({ message: 'Lote insertado correctamente', total: insertados.length });
+        res.status(201).json({
+            message: 'Lote procesado correctamente',
+            total: reportes.length,
+            productosAgregados: nuevosProductos.length,
+            detallesGuardados: detalles.length
+        });
+
     } catch (error) {
-        console.error('❌ Error al insertar lote:', error);
-        res.status(500).json({ error: 'Error en la inserción del lote', detalle: error.message });
+        console.error('❌ Error al procesar lote:', error);
+        res.status(500).json({ error: 'Error interno del servidor', detalle: error.message });
     }
 };
 
@@ -93,7 +121,7 @@ const obtenerDetalleProducto = async (req, res) => {
 
 module.exports = {
     insertarDetalleReporte,
-    insertarLote,
+    insertarLoteReporte,
     obtenerDetallesConProducto,
     obtenerDetalleProducto
 };
