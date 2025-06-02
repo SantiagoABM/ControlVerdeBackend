@@ -3,8 +3,6 @@ const productoService = require('../services/productoService.js');
 const Producto = require('../models/Producto.js');
 const DetalleReporte = require('../models/DetalleReporte.js');
 
-
-
 const insertarDetalleReporte = async (req, res) => {
     try {
         await detalleReporteService.insertarDetalleReporte(req.body);

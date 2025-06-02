@@ -3,15 +3,17 @@ const reporteService = require('../services/reporteService.js');
 
 const insertarReporte = async (req, res) => {
     try {
-        response = await reporteService.buscarReporte(req.body);
-        if (response) {
-            res.status(400).json({
-                message: 'El reporte ya ha sido registrado'
+        const tim = req.body.tim;
+        const response = await reporteService.buscarReporte(tim);
+        console.log(response)
+        if (!response) {
+            await reporteService.insertarReporte(req.body);
+            return res.status(201).json({
+                message: 'Reporte insertado con éxito'
             });
         }
-        await reporteService.insertarReporte(req.body);
-        res.status(201).json({
-            message: 'Reporte insertado con éxito'
+        res.status(400).json({
+            message: 'El reporte ya ha sido registrado'
         });
     } catch (error) {
         res.status(500).json({ error: 'Error al insertar el Reporte', detalle: error.message });
