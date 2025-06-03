@@ -35,6 +35,14 @@ const getProductosBySkus = async (skus) => {
     );
 };
 
+async function updateProducto(id, ean, uMedida, costoPromedio, precioVigente, marca, proveedor) {
+    return Producto.findByIdAndUpdate(
+        id,
+        { ean, uMedida, costoPromedio, precioVigente, marca, proveedor},
+        { new: true } // devuelve el documento actualizado
+    );
+}
+
 const validateSkus = async (skus) => {
     return await Producto.find({ sku: { $in: skusUnicos } }).select('sku');
 };
@@ -44,5 +52,6 @@ module.exports = {
     buscarProductoPorCodigo,
     insertarProductosEnLote,
     getProductosBySkus,
+    updateProducto,
     validateSkus
 };

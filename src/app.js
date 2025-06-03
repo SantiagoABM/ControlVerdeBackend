@@ -19,6 +19,15 @@ const io = new Server(server, {
     cors: { origin: '*' }
 });
 
+io.on('connection', (socket) => {
+    console.log(`✅ Nuevo cliente conectado: ${socket.id}`);
+
+    socket.on('disconnect', () => {
+        console.log(`❌ Cliente desconectado: ${socket.id}`);
+    });
+});
+
+
 //settings
 app.set('pkg', pkg);
 app.set("json spaces", 4);
@@ -41,5 +50,4 @@ app.use("/api/productos", productoRoute);
 app.use("/api/reportes", reporteRoute);
 app.use("/api/detallereportes", detalleReporteRoute);
 
-
-module.exports = app;
+module.exports = { app, server };

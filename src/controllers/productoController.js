@@ -47,6 +47,30 @@ const buscarProducto = async (req, res) => {
     }
 };
 
+const updateDatosProducto = async (req, res) => {
+    try {
+        const { id, ean, uMedida, costoPromedio, precioVigente, marca, proveedor,socketId } = req.body
+        const result = await productoService.updateProducto(id, ean, uMedida, costoPromedio, precioVigente, marca, proveedor);
+
+        if (!result) {
+            console.log('❌ No se encontró el reporte con ese ID');
+            return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
+        }
+
+        req.io.sockets.sockets.forEach((socket) => {
+            if (socket.id !== socketId) {
+                socket.emit('producto-actualizado', result);
+            }
+        });
+
+        console.log('✅ Reporte actualizado:', result);
+        return res.json(result);
+    } catch (error) {
+        console.error('❌ Error al actualizar uRecibidas:', error);
+        return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
+    }
+}
+
 const getProductosBySkus = async (req, res) => {
   const { skus } = req.body;
 
@@ -68,5 +92,6 @@ module.exports = {
     insertarProducto,
     buscarProducto,
     insertarLote,
-    getProductosBySkus
+    getProductosBySkus,
+    updateDatosProducto
 };
