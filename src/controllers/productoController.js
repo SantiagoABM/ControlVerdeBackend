@@ -49,8 +49,8 @@ const buscarProducto = async (req, res) => {
 
 const updateDatosProducto = async (req, res) => {
     try {
-        const { id, ean, uMedida, costoPromedio, precioVigente, marca, proveedor,socketId } = req.body
-        const result = await productoService.updateProducto(id, ean, uMedida, costoPromedio, precioVigente, marca, proveedor);
+        const { sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor,socketId } = req.body
+        const result = await productoService.updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor);
 
         if (!result) {
             console.log('❌ No se encontró el reporte con ese ID');

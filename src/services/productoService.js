@@ -35,9 +35,9 @@ const getProductosBySkus = async (skus) => {
     );
 };
 
-async function updateProducto(id, ean, uMedida, costoPromedio, precioVigente, marca, proveedor) {
+async function updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor) {
     return Producto.findByIdAndUpdate(
-        id,
+        sku,
         { ean, uMedida, costoPromedio, precioVigente, marca, proveedor},
         { new: true } // devuelve el documento actualizado
     );
