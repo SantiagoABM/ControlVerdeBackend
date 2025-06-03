@@ -36,7 +36,7 @@ const getProductosBySkus = async (skus) => {
 };
 
 async function updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor) {
-    return Producto.findByIdAndUpdate(
+    return Producto.findOneAndUpdate(
         sku,
         { ean, uMedida, costoPromedio, precioVigente, marca, proveedor},
         { new: true } // devuelve el documento actualizado
