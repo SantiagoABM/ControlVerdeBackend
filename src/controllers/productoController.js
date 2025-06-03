@@ -3,11 +3,11 @@ const productoService = require('../services/productoService.js');
 const insertarProducto = async (req, res) => {
     try {
         await productoService.insertarProducto(req.body);
-        res.status(201).json({
+        return res.status(201).json({
             message: 'Producto insertado con éxito'
         });
     } catch (error) {
-        res.status(500).json({ error: 'Error al insertar el producto', detalle: error.message });
+        return res.status(500).json({ error: 'Error al insertar el producto', detalle: error.message });
     }
 };
 
@@ -20,10 +20,10 @@ const insertarLote = async (req, res) => {
         }
 
         const insertados = await productoService.insertarProductosEnLote(productos);
-        res.status(201).json({ message: 'Lote insertado', total: insertados.length });
+        return res.status(201).json({ message: 'Lote insertado', total: insertados.length });
     } catch (error) {
         console.error('Error al insertar lote:', error);
-        res.status(500).json({ error: 'Error en la inserción del lote', detalle: error.message });
+        return res.status(500).json({ error: 'Error en la inserción del lote', detalle: error.message });
     }
 };
 
@@ -38,12 +38,12 @@ const buscarProducto = async (req, res) => {
             return res.status(404).json({ message: 'Producto no encontrado' });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             message: 'Producto encontrado',
             producto: producto
         });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        return res.status(400).json({ error: error.message });
     }
 };
 
@@ -56,10 +56,10 @@ const getProductosBySkus = async (req, res) => {
 
   try {
     const productos = await productoService.getProductosBySkus(skus);
-    res.status(200).json(productos);
+    return res.status(200).json(productos);
   } catch (error) {
     console.error('Error en getProductosBySkus:', error);
-    res.status(500).json({ message: 'Error al obtener productos' });
+    return res.status(500).json({ message: 'Error al obtener productos' });
   }
 };
 

@@ -1,8 +1,10 @@
 const express = require('express');
+const http = require('http');
 const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
 const pkg = require('../package.json');
+const { Server } = require('socket.io');
 const helmet = require("helmet");
 //rutas
 const productoRoute = require("./routes/productoRoute.js");
@@ -11,6 +13,11 @@ const detalleReporteRoute = require("./routes/detalleReporteRoute.js");
 
 
 const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
+    cors: { origin: '*' }
+});
 
 //settings
 app.set('pkg', pkg);
@@ -26,6 +33,10 @@ app.use(cors());
 app.use(express.urlencoded({ extend: false }));
 
 //rutas
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
 app.use("/api/productos", productoRoute);
 app.use("/api/reportes", reporteRoute);
 app.use("/api/detallereportes", detalleReporteRoute);

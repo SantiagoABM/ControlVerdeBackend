@@ -1,16 +1,15 @@
 const detalleReporteService = require('../services/detalleReporteService.js');
-const productoService = require('../services/productoService.js');
 const Producto = require('../models/Producto.js');
 const DetalleReporte = require('../models/DetalleReporte.js');
 
 const insertarDetalleReporte = async (req, res) => {
     try {
         await detalleReporteService.insertarDetalleReporte(req.body);
-        res.status(201).json({
+        return res.status(201).json({
             message: 'Detalle del reporte insertado con éxito'
         });
     } catch (error) {
-        res.status(500).json({ error: 'Error al insertar el detalle del reporte', detalle: error.message });
+        return res.status(500).json({ error: 'Error al insertar el detalle del reporte', detalle: error.message });
     }
 };
 
@@ -79,7 +78,7 @@ const insertarLoteReporte = async (req, res) => {
             await DetalleReporte.insertMany(detalles, { ordered: false });
         }
 
-        res.status(201).json({
+        return res.status(201).json({
             message: 'Lote procesado correctamente',
             total: reportes.length,
             productosAgregados: nuevosProductos.length,
@@ -88,7 +87,7 @@ const insertarLoteReporte = async (req, res) => {
 
     } catch (error) {
         console.error('❌ Error al procesar lote:', error);
-        res.status(500).json({ error: 'Error interno del servidor', detalle: error.message });
+        return res.status(500).json({ error: 'Error interno del servidor', detalle: error.message });
     }
 };
 
@@ -98,40 +97,58 @@ const obtenerDetallesConProducto = async (req, res) => {
         const { tim } = req.params;
         console.log(tim);
         const detalles = await detalleReporteService.obtenerDetallesConProductoService(tim);
-        res.json(detalles);
+        return res.json(detalles);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ mensaje: 'Error al obtener los detalles con información de productos' });
+        return res.status(500).json({ mensaje: 'Error al obtener los detalles con información de productos' });
     }
 };
 
-const actualizarRecibidosPorId = async (req, res) => {
+const updateRecibidos = async (req, res) => {
     try {
-        const {_id , uRecibidas} = req.body;
-
-    } catch (error) {
-
-    }
-}
-
-async function updateRecibidos(id, unidadesRecibidas) {
-    try {
-        const result = await Reporte.findByIdAndUpdate(
-            id,
-            { uRecibidas: unidadesRecibidas },
-            { new: true } // devuelve el documento actualizado
-        );
+        const { id, uRecibidas, socketId } = req.body
+        const result = await detalleReporteService.updateRecibidos(id, uRecibidas)
 
         if (!result) {
             console.log('❌ No se encontró el reporte con ese ID');
-            return false;
+            return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
         }
 
+        req.io.sockets.sockets.forEach((socket) => {
+            if (socket.id !== socketId) {
+                socket.emit('producto-actualizado', result);
+            }
+        });
+
         console.log('✅ Reporte actualizado:', result);
-        return result;
+        return res.json(result);
     } catch (error) {
         console.error('❌ Error al actualizar uRecibidas:', error);
-        return false;
+        return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
+    }
+}
+
+const updateDatosDetalle = async (req, res) => {
+    try {
+        const { id, uRecibidas, fechavencimiento ,socketId } = req.body
+        const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento);
+
+        if (!result) {
+            console.log('❌ No se encontró el reporte con ese ID');
+            return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
+        }
+
+        req.io.sockets.sockets.forEach((socket) => {
+            if (socket.id !== socketId) {
+                socket.emit('producto-actualizado', result);
+            }
+        });
+
+        console.log('✅ Reporte actualizado:', result);
+        return res.json(result);
+    } catch (error) {
+        console.error('❌ Error al actualizar uRecibidas:', error);
+        return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
     }
 }
 
@@ -141,16 +158,18 @@ const obtenerDetalleProducto = async (req, res) => {
         const { tim } = req.params;
         console.log(tim);
         const detalles = await detalleReporteService.obtenerDetallesConProductoService(tim);
-        res.json(detalles);
+        return res.json(detalles);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ mensaje: 'Error al obtener los detalles con información de productos' });
+        return res.status(500).json({ mensaje: 'Error al obtener los detalles con información de productos' });
     }
 };
 
 module.exports = {
     insertarDetalleReporte,
     insertarLoteReporte,
+    updateRecibidos,
+    updateDatosDetalle,
     obtenerDetallesConProducto,
     obtenerDetalleProducto
 };

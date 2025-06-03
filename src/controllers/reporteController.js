@@ -12,11 +12,11 @@ const insertarReporte = async (req, res) => {
                 message: 'Reporte insertado con éxito'
             });
         }
-        res.status(400).json({
+        return res.status(400).json({
             message: 'El reporte ya ha sido registrado'
         });
     } catch (error) {
-        res.status(500).json({ error: 'Error al insertar el Reporte', detalle: error.message });
+        return res.status(500).json({ error: 'Error al insertar el Reporte', detalle: error.message });
     }
 };
 
@@ -25,9 +25,9 @@ const buscarPorMotivo = async (req, res) => {
         const { motivo } = req.query;
 
         const resultados = await reporteService.buscarReportePorMotivo(motivo);
-        res.status(200).json(resultados);
+        return res.status(200).json(resultados);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        return res.status(400).json({ error: error.message });
     }
 };
 
@@ -41,12 +41,12 @@ const buscarReporte = async (req, res) => {
             return res.status(404).json({ message: 'Reporte no encontrado' });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             message: 'Reporte encontrado',
             reporte: reporte
         });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        return res.status(400).json({ error: error.message });
     }
 };
 

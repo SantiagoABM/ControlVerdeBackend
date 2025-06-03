@@ -8,6 +8,23 @@ async function insertarDetalleReporteEnLote(detalleReportes) {
     return await DetalleReporte.insertMany(detalleReportes, { ordered: false });
 }
 
+async function updateRecibidos(id, unidadesRecibidas) {
+    return DetalleReporte.findByIdAndUpdate(
+        id,
+        { uRecibidas: unidadesRecibidas },
+        { new: true } // devuelve el documento actualizado
+    );
+}
+
+async function updateDatos(id, uRecibidas, fechavencimiento) {
+    return DetalleReporte.findByIdAndUpdate(
+        id,
+        { uRecibidas, fechavencimiento},
+        { new: true } // devuelve el documento actualizado
+    );
+}
+
+
 const obtenerDetallesConProductoService = async (tim) => {
     console.log(tim);
     const resultados = await DetalleReporte.aggregate([
@@ -110,7 +127,8 @@ const obtenerDetalleProductoService = async (tim) => {
 module.exports = {
     insertarDetalleReporte,
     insertarDetalleReporteEnLote,
-    
+    updateRecibidos,
+    updateDatos,
     obtenerDetallesConProductoService,
     obtenerDetalleProductoService
 };
