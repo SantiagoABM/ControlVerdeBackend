@@ -26,7 +26,6 @@ async function updateDatos(id, uRecibidas, fechavencimiento) {
 
 
 const obtenerDetallesConProductoService = async (tim) => {
-    console.log(tim);
     const resultados = await DetalleReporte.aggregate([
         { $match: { tim: parseInt(tim) } },
         {
@@ -75,7 +74,6 @@ const obtenerDetallesConProductoService = async (tim) => {
 };
 
 const obtenerDetalleProductoService = async (tim) => {
-    console.log(tim);
     const resultados = await DetalleReporte.aggregate([
         { $match: { tim: parseInt(tim) } },
         {

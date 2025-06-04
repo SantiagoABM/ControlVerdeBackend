@@ -5,7 +5,6 @@ const insertarReporte = async (req, res) => {
     try {
         const tim = req.body.tim;
         const response = await reporteService.buscarReporte(tim);
-        console.log(response)
         if (!response) {
             await reporteService.insertarReporte(req.body);
             return res.status(201).json({

@@ -14,7 +14,6 @@ const insertarProducto = async (req, res) => {
 const insertarLote = async (req, res) => {
     try {
         const productos = req.body;
-        console.log('Lote recibido:', JSON.stringify(req.body));
         if (!productos || !Array.isArray(productos) || productos.length === 0) {
             return res.status(400).json({ error: 'Se esperaba un arreglo de productos' });
         }
@@ -22,7 +21,6 @@ const insertarLote = async (req, res) => {
         const insertados = await productoService.insertarProductosEnLote(productos);
         return res.status(201).json({ message: 'Lote insertado', total: insertados.length });
     } catch (error) {
-        console.error('Error al insertar lote:', error);
         return res.status(500).json({ error: 'Error en la inserción del lote', detalle: error.message });
     }
 };
@@ -53,7 +51,6 @@ const updateDatosProducto = async (req, res) => {
         const result = await productoService.updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor);
 
         if (!result) {
-            console.log('❌ No se encontró el reporte con ese ID');
             return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
         }
 
@@ -62,11 +59,8 @@ const updateDatosProducto = async (req, res) => {
                 socket.emit('producto-actualizado', result);
             }
         });
-
-        console.log('✅ Reporte actualizado:', result);
         return res.json(result);
     } catch (error) {
-        console.error('❌ Error al actualizar uRecibidas:', error);
         return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
     }
 }
@@ -82,7 +76,6 @@ const getProductosBySkus = async (req, res) => {
     const productos = await productoService.getProductosBySkus(skus);
     return res.status(200).json(productos);
   } catch (error) {
-    console.error('Error en getProductosBySkus:', error);
     return res.status(500).json({ message: 'Error al obtener productos' });
   }
 };
