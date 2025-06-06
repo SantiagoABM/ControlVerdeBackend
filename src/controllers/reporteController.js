@@ -1,5 +1,6 @@
 const { response } = require('../app.js');
 const reporteService = require('../services/reporteService.js');
+const detalleReporteService = require('../services/detalleReporteService.js');
 
 const insertarReporte = async (req, res) => {
     try {
@@ -49,9 +50,25 @@ const buscarReporte = async (req, res) => {
     }
 };
 
+const eliminarReporteyDetalles = async (req, res) => {
+    const { tim } = req.params;
+    try {
+        console.log(tim)
+        const detallesResult = await detalleReporteService.deleteDetallesReporte(tim);
+        const reporteResult = await reporteService.deleteReporte(tim);
+
+        return res.status(200).json({
+            message: 'Reporte y detalles eliminados correctamente'
+        });
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
 
 module.exports = {
     insertarReporte,
     buscarPorMotivo,
-    buscarReporte
+    buscarReporte,
+    eliminarReporteyDetalles
 };

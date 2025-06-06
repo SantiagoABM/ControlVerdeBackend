@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const detalleReporteSchema = new mongoose.Schema({
+  // reporteId: {type: mongoose.Schema.ObjectId, ref: 'Reporte'},
+  // productoId: {type: mongoose.Schema.ObjectId, ref: 'Producto'},
   tim: Number,
   olpn: String,
   sku: String,

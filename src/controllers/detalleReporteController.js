@@ -154,11 +154,24 @@ const obtenerDetalleProducto = async (req, res) => {
     }
 };
 
+const deleteDetalleReporte = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await detalleReporteService.deleteDetalleRep(id);
+        return res.status(200).json({
+            message: 'Producto Eliminado Correctamente'
+        });
+    } catch (error) {
+        return res.status(500).json({ mensaje: 'Error al eliminar el producto' });
+    }
+}
+
 module.exports = {
     insertarDetalleReporte,
     insertarLoteReporte,
     updateRecibidos,
     updateDatosDetalle,
+    deleteDetalleReporte,
     obtenerDetallesConProducto,
     obtenerDetalleProducto
 };

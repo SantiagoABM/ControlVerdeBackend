@@ -5,10 +5,17 @@ async function insertarReporte(data) {
     return await reporte.save();
 }
 
+// async function deleteReporte(tim) {
+//     await Reporte.findOneAndUpdate({ tim },{estado:false});
+// }
+async function deleteReporte(tim) {
+    return await Reporte.deleteOne({ tim });
+}
+
 async function buscarReportePorMotivo(motivo) {
     if (!motivo) throw new Error('Motivo requerido');
     const reportes = await Reporte.find(
-        { motivo: motivo },
+        { motivo: motivo , estado: true},
         { tim: 1, _id: 0 } 
     );
     return reportes.map(r => r.tim);
@@ -24,6 +31,7 @@ async function buscarReporte(reporte) {
 
 module.exports = {
     insertarReporte,
+    deleteReporte,
     buscarReportePorMotivo,
     buscarReporte
 };

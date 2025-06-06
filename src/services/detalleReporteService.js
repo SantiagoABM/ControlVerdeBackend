@@ -121,10 +121,19 @@ const obtenerDetalleProductoService = async (tim) => {
 
     return resultados;
 };
+async function deleteDetalleRep(id) {
+    await DetalleReporte.findByIdAndDelete(id);
+}
+async function deleteDetallesReporte(tim) {
+    console.log(tim)
+    return await DetalleReporte.deleteMany({ tim:tim });
+}
 
 module.exports = {
     insertarDetalleReporte,
     insertarDetalleReporteEnLote,
+    deleteDetallesReporte,
+    deleteDetalleRep,
     updateRecibidos,
     updateDatos,
     obtenerDetallesConProductoService,
