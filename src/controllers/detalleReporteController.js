@@ -105,17 +105,18 @@ const updateRecibidos = async (req, res) => {
     try {
         const { id, uRecibidas, socketId } = req.body
         const result = await detalleReporteService.updateRecibidos(id, uRecibidas)
-
+        
         if (!result) {
             return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
         }
 
-        req.io.sockets.sockets.forEach((socket) => {
+        const sockets = await req.io.fetchSockets();
+        sockets.forEach(socket => {
             if (socket.id !== socketId) {
                 socket.emit('producto-actualizado', result);
             }
         });
-        return res.json(result);
+        return res.status(204).json(result);
     } catch (error) {
         console.error('❌ Error al actualizar uRecibidas:', error);
         return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
@@ -124,7 +125,7 @@ const updateRecibidos = async (req, res) => {
 
 const updateDatosDetalle = async (req, res) => {
     try {
-        const { id, uRecibidas, fechavencimiento ,socketId } = req.body
+        const { id, uRecibidas, fechavencimiento, socketId } = req.body
         const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento);
 
         if (!result) {
@@ -157,7 +158,13 @@ const obtenerDetalleProducto = async (req, res) => {
 const deleteDetalleReporte = async (req, res) => {
     try {
         const { id } = req.params;
+        const { socketId } = req.body;
         await detalleReporteService.deleteDetalleRep(id);
+        req.io.sockets.sockets.forEach((socket) => {
+            if (socket.id !== socketId) {
+                socket.emit('producto-eliminado', result);    
+            }
+        });
         return res.status(200).json({
             message: 'Producto Eliminado Correctamente'
         });
