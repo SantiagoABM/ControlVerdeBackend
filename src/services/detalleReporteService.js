@@ -73,9 +73,9 @@ const obtenerDetallesConProductoService = async (tim) => {
     return resultados;
 };
 
-const obtenerDetalleProductoService = async (tim) => {
+const obtenerDetalleProductoServiceBySku = async (sku) => {
     const resultados = await DetalleReporte.aggregate([
-        { $match: { tim: parseInt(tim) } },
+        { $match: { sku: String(sku) } },
         {
             $lookup: {
                 from: 'productos',
@@ -99,7 +99,6 @@ const obtenerDetalleProductoService = async (tim) => {
         },
         {
             $project: {
-                id: '$_id', // opcional si lo quieres como id
                 tim: 1,
                 olpn: 1,
                 sku: 1,
@@ -119,7 +118,7 @@ const obtenerDetalleProductoService = async (tim) => {
         }
     ]);
 
-    return resultados;
+    return resultados[0] || null;
 };
 async function deleteDetalleRep(id) {
     await DetalleReporte.findByIdAndDelete(id);
@@ -137,5 +136,5 @@ module.exports = {
     updateRecibidos,
     updateDatos,
     obtenerDetallesConProductoService,
-    obtenerDetalleProductoService
+    obtenerDetalleProductoServiceBySku
 };

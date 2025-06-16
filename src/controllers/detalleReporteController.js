@@ -4,9 +4,17 @@ const DetalleReporte = require('../models/DetalleReporte.js');
 
 const insertarDetalleReporte = async (req, res) => {
     try {
-        await detalleReporteService.insertarDetalleReporte(req.body);
+        const result = await detalleReporteService.insertarDetalleReporte(req.body);
+        console.log(result);
+        const resultado = await detalleReporteService.obtenerDetalleProductoServiceBySku(result.sku);
+        const sockets = await req.io.fetchSockets();
+        sockets.forEach(socket => {
+            if (socket.id !== socketId) {
+                socket.emit('producto-agregado', resultado);
+            }
+        });
         return res.status(201).json({
-            message: 'Detalle del reporte insertado con éxito'
+            message: 'Detalle del reporte insertado con éxito', resultado: resultado
         });
     } catch (error) {
         return res.status(500).json({ error: 'Error al insertar el detalle del reporte', detalle: error.message });
@@ -163,7 +171,7 @@ const deleteDetalleReporte = async (req, res) => {
         await detalleReporteService.deleteDetalleRep(id);
         req.io.sockets.sockets.forEach((socket) => {
             if (socket.id !== socketId) {
-                socket.emit('producto-eliminado', result);    
+                socket.emit('producto-eliminado', result);
             }
         });
         return res.status(200).json({
