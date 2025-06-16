@@ -139,7 +139,7 @@ const updateDatosDetalle = async (req, res) => {
             }
         });
 
-        return res.json(result);
+        return res.status(204).json(result);
     } catch (error) {
         return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
     }
