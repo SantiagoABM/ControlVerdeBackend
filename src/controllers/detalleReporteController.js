@@ -116,7 +116,7 @@ const updateRecibidos = async (req, res) => {
                 socket.emit('producto-actualizado', result);
             }
         });
-        return res.status(204).json(result);
+        return res.status(200).json(result);
     } catch (error) {
         console.error('❌ Error al actualizar uRecibidas:', error);
         return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
@@ -139,7 +139,7 @@ const updateDatosDetalle = async (req, res) => {
             }
         });
 
-        return res.status(204).json(result);
+        return res.status(200).json(result);
     } catch (error) {
         return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
     }
