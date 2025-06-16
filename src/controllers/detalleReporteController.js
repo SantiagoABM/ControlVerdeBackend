@@ -105,7 +105,7 @@ const updateRecibidos = async (req, res) => {
     try {
         const { id, uRecibidas, socketId } = req.body
         const result = await detalleReporteService.updateRecibidos(id, uRecibidas)
-        
+
         if (!result) {
             return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
         }
@@ -132,7 +132,8 @@ const updateDatosDetalle = async (req, res) => {
             return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
         }
 
-        req.io.sockets.sockets.forEach((socket) => {
+        const sockets = await req.io.fetchSockets();
+        sockets.forEach(socket => {
             if (socket.id !== socketId) {
                 socket.emit('producto-actualizado', result);
             }
