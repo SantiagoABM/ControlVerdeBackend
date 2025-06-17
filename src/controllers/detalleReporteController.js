@@ -4,7 +4,8 @@ const DetalleReporte = require('../models/DetalleReporte.js');
 
 const insertarDetalleReporte = async (req, res) => {
     try {
-        const result = await detalleReporteService.insertarDetalleReporte(req.body);
+        const { socketId, detalleReporte } = req.body;
+        const result = await detalleReporteService.insertarDetalleReporte(detalleReporte);
         console.log(result);
         const resultado = await detalleReporteService.obtenerDetalleProductoServiceBySku(result.sku);
         const sockets = await req.io.fetchSockets();
