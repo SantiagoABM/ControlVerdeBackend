@@ -99,6 +99,7 @@ const obtenerDetalleProductoServiceBySku = async (sku) => {
         },
         {
             $project: {
+                _id: 1,
                 tim: 1,
                 olpn: 1,
                 sku: 1,

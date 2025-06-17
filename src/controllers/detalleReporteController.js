@@ -6,7 +6,6 @@ const insertarDetalleReporte = async (req, res) => {
     try {
         const { socketId, detalleReporte } = req.body;
         const result = await detalleReporteService.insertarDetalleReporte(detalleReporte);
-        console.log(result);
         const resultado = await detalleReporteService.obtenerDetalleProductoServiceBySku(result.sku);
         const sockets = await req.io.fetchSockets();
         sockets.forEach(socket => {
