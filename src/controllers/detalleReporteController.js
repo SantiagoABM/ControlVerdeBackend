@@ -4,22 +4,25 @@ const DetalleReporte = require('../models/DetalleReporte.js');
 
 const insertarDetalleReporte = async (req, res) => {
     try {
-        const { socketId, detalleReporte } = req.body;
+        const { socketId, detalleReporte, salaId } = req.body; // <- salaId enviado desde frontend
         const result = await detalleReporteService.insertarDetalleReporte(detalleReporte);
         const resultado = await detalleReporteService.obtenerDetalleProductoServiceBySku(result.sku);
-        const sockets = await req.io.fetchSockets();
-        sockets.forEach(socket => {
-            if (socket.id !== socketId) {
-                socket.emit('producto-agregado', resultado);
-            }
-        });
+
+        // Emitir a todos en la sala excepto al emisor
+        req.io.to(salaId).except(socketId).emit('producto-agregado', resultado);
+
         return res.status(201).json({
-            message: 'Detalle del reporte insertado con éxito', resultado: resultado
+            message: 'Detalle del reporte insertado con éxito',
+            resultado: resultado
         });
     } catch (error) {
-        return res.status(500).json({ error: 'Error al insertar el detalle del reporte', detalle: error.message });
+        return res.status(500).json({
+            error: 'Error al insertar el detalle del reporte',
+            detalle: error.message
+        });
     }
 };
+
 
 const insertarLoteReporte = async (req, res) => {
     try {
@@ -111,19 +114,14 @@ const obtenerDetallesConProducto = async (req, res) => {
 
 const updateRecibidos = async (req, res) => {
     try {
-        const { id, uRecibidas, socketId } = req.body
+        const { id, uRecibidas, socketId, salaId } = req.body
         const result = await detalleReporteService.updateRecibidos(id, uRecibidas)
 
         if (!result) {
             return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
         }
+        req.io.to(salaId).except(socketId).emit('producto-actualizado', result);
 
-        const sockets = await req.io.fetchSockets();
-        sockets.forEach(socket => {
-            if (socket.id !== socketId) {
-                socket.emit('producto-actualizado', result);
-            }
-        });
         return res.status(200).json(result);
     } catch (error) {
         console.error('❌ Error al actualizar uRecibidas:', error);
@@ -133,19 +131,14 @@ const updateRecibidos = async (req, res) => {
 
 const updateDatosDetalle = async (req, res) => {
     try {
-        const { id, uRecibidas, fechavencimiento, socketId } = req.body
+        const { id, uRecibidas, fechavencimiento, socketId, salaId } = req.body
         const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento);
 
         if (!result) {
             return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
         }
 
-        const sockets = await req.io.fetchSockets();
-        sockets.forEach(socket => {
-            if (socket.id !== socketId) {
-                socket.emit('producto-actualizado', result);
-            }
-        });
+        req.io.to(salaId).except(socketId).emit('producto-actualizado', result);
 
         return res.status(200).json(result);
     } catch (error) {

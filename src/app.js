@@ -20,7 +20,11 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-    console.log(`✅ Nuevo cliente conectado: ${socket.id}`);
+    console.log('Nuevo socket conectado:', socket.id);
+    socket.on('joinSala', (salaId) => {
+        socket.join(salaId);
+        console.log(`Socket ${socket.id} se unió a la sala ${salaId}`);
+    });
 
     socket.on('disconnect', () => {
         console.log(`❌ Cliente desconectado: ${socket.id}`);
