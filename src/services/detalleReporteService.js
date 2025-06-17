@@ -106,7 +106,7 @@ const obtenerDetalleProductoServiceBySku = async (sku) => {
                 ean: '$productoInfo.ean',
                 subdpto: '$productoInfo.subdpto',
                 descripcion: '$productoInfo.descripcion',
-                casePack: 1,
+                casePack: '$productoInfo.casePack',
                 uMedida: '$productoInfo.uMedida',
                 precioVigente: { $ifNull: ['$productoInfo.precioVigente', 0] },
                 costoPromedio: { $ifNull: ['$productoInfo.costoPromedio', 0] },
