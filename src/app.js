@@ -26,7 +26,13 @@ io.on('connection', (socket) => {
         console.log(`Socket ${socket.id} se unió a la sala ${salaId}`);
     });
 
+    socket.on('leaveSala', (salaId) => {
+        socket.leave(salaId);
+        console.log(`Socket ${socket.id} abandonó la sala ${salaId}`);
+    });
+
     socket.on('disconnect', () => {
+        socket.disconnect();
         console.log(`❌ Cliente desconectado: ${socket.id}`);
     });
 });
