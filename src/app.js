@@ -7,6 +7,7 @@ const pkg = require('../package.json');
 const { Server } = require('socket.io');
 const helmet = require("helmet");
 //rutas
+const testRoute = require('./routes/testRoute');
 const productoRoute = require("./routes/productoRoute.js");
 const reporteRoute = require("./routes/reporteRoute.js");
 const detalleReporteRoute = require("./routes/detalleReporteRoute.js");
@@ -18,7 +19,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: { origin: '*' }
 });
-
+    
 io.on('connection', (socket) => {
     console.log('Nuevo socket conectado:', socket.id);
     socket.on('joinSala', (salaId) => {
@@ -32,7 +33,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        socket.disconnect();
         console.log(`❌ Cliente desconectado: ${socket.id}`);
     });
 });
@@ -56,6 +56,7 @@ app.use((req, res, next) => {
     req.io = io;
     next();
 });
+app.use('/api', testRoute);
 app.use("/api/productos", productoRoute);
 app.use("/api/reportes", reporteRoute);
 app.use("/api/detallereportes", detalleReporteRoute);
