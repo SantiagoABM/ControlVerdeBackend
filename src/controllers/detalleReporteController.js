@@ -162,11 +162,7 @@ const deleteDetalleReporte = async (req, res) => {
         const { id } = req.params;
         const { socketId } = req.body;
         await detalleReporteService.deleteDetalleRep(id);
-        req.io.sockets.sockets.forEach((socket) => {
-            if (socket.id !== socketId) {
-                socket.emit('producto-eliminado', result);
-            }
-        });
+        req.io.to(salaId).except(socketId).emit('producto-eliminado', id);
         return res.status(200).json({
             message: 'Producto Eliminado Correctamente'
         });

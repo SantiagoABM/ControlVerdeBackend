@@ -4,7 +4,6 @@ const router = express.Router();
 
 router.get('/ping', (req, res) => {
   try {
-    // Aquí puedes agregar cualquier lógica extra si deseas
     return res.status(200).json({ mensaje: '✅ Conexión exitosa' });
   } catch (error) {
     console.error('❌ Error en /ping:', error);
