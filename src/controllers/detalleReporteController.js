@@ -160,7 +160,7 @@ const obtenerDetalleProducto = async (req, res) => {
 const deleteDetalleReporte = async (req, res) => {
     try {
         const { id } = req.params;
-        const { socketId } = req.body;
+        const { socketId, salaId } = req.body;
         await detalleReporteService.deleteDetalleRep(id);
         req.io.to(salaId).except(socketId).emit('producto-eliminado', id);
         return res.status(200).json({
