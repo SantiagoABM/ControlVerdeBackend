@@ -11,16 +11,16 @@ async function buscarProductoPorCodigo(codigo) {
     let columna = null;
     if (codigo.length === 8) {
         columna = 'sku';
-    } else if (codigo.length > 8) {
+    } else if (codigo.length > 8 > codigo.length) {
         columna = 'ean';
     } else {
         throw new Error('Código inválido o muy corto');
     }
 
     const query = {};
-    query[columna] = { $regex: codigo, $options: 'i' };
+    query[columna] = codigo;
+    // query[columna] = { $regex: codigo, $options: 'i' };
     const producto = await Producto.findOne(query);
-
     return producto;
 }
 
