@@ -8,21 +8,36 @@ async function insertarProducto(data) {
 async function buscarProductoPorCodigo(codigo) {
     if (!codigo) throw new Error('Código requerido');
 
-    let columna = null;
-    if (codigo.length === 8) {
-        columna = 'sku';
-    } else if (codigo.length > 8 > codigo.length) {
-        columna = 'ean';
-    } else {
-        throw new Error('Código inválido o muy corto');
+    // Buscar por SKU
+    let producto = await Producto.findOne({ sku: codigo });
+
+    // Si no se encontró, buscar por EAN
+    if (!producto) {
+        producto = await Producto.findOne({ ean: codigo });
     }
 
-    const query = {};
-    query[columna] = codigo;
-    // query[columna] = { $regex: codigo, $options: 'i' };
-    const producto = await Producto.findOne(query);
     return producto;
 }
+
+
+// async function buscarProductoPorCodigo(codigo) {
+//     if (!codigo) throw new Error('Código requerido');
+
+//     let columna = null;
+//     if (codigo.length === 8) {
+//         columna = 'sku';
+//     } else if (codigo.length > 8 > codigo.length) {
+//         columna = 'ean';
+//     } else {
+//         throw new Error('Código inválido o muy corto');
+//     }
+
+//     const query = {};
+//     query[columna] = codigo;
+//     // query[columna] = { $regex: codigo, $options: 'i' };
+//     const producto = await Producto.findOne(query);
+//     return producto;
+// }
 
 async function insertarProductosEnLote(productos) {
     return await Producto.insertMany(productos, { ordered: false });
