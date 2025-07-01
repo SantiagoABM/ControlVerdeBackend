@@ -76,7 +76,7 @@ const obtenerDetallesConProductoService = async (tim) => {
 const obtenerDetalleProductoServiceBySku = async (sku) => {
     const resultados = await DetalleReporte.aggregate([
         { $match: { sku: String(sku),
-            tim: String(tim)
+            tim: Number(tim)
          }
         
     },
