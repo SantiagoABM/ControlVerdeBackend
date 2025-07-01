@@ -1,4 +1,3 @@
-const { response } = require('../app.js');
 const reporteService = require('../services/reporteService.js');
 const detalleReporteService = require('../services/detalleReporteService.js');
 
@@ -52,18 +51,37 @@ const buscarReporte = async (req, res) => {
 
 const eliminarReporteyDetalles = async (req, res) => {
     const { tim } = req.params;
+
     try {
-        console.log(tim)
-        const detallesResult = await detalleReporteService.deleteDetallesReporte(tim);
-        const reporteResult = await reporteService.deleteReporte(tim);
+        const fechaExpiracion = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); // 2 días
+
+        // En vez de borrar, marcamos para expiración
+        await detalleReporteService.marcarDetallesParaExpiracion(tim, fechaExpiracion);
+        await reporteService.marcarReporteParaExpiracion(tim, fechaExpiracion);
 
         return res.status(200).json({
-            message: 'Reporte y detalles eliminados correctamente'
+            message: 'Reporte y detalles serán eliminados en 2 días'
         });
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
 };
+
+
+// const eliminarReporteyDetalles = async (req, res) => {
+//     const { tim } = req.params;
+//     try {
+//         console.log(tim)
+//         const detallesResult = await detalleReporteService.deleteDetallesReporte(tim);
+//         const reporteResult = await reporteService.deleteReporte(tim);
+
+//         return res.status(200).json({
+//             message: 'Reporte y detalles eliminados correctamente'
+//         });
+//     } catch (error) {
+//         return res.status(500).json({ error: error.message });
+//     }
+// };
 
 
 module.exports = {

@@ -14,7 +14,13 @@ const reporteSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    expireAt: {
+        type: Date,
+        default: null
+    },
     motivo: String,
 }, { timestamps: false });
+
+reporteSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model('Reporte', reporteSchema);

@@ -11,7 +11,7 @@ async function insertarDetalleReporteEnLote(detalleReportes) {
 async function updateRecibidos(id, unidadesRecibidas) {
     return DetalleReporte.findByIdAndUpdate(
         id,
-        { uRecibidas: unidadesRecibidas },
+        {$set :{ uRecibidas: unidadesRecibidas }},
         { new: true } // devuelve el documento actualizado
     );
 }
@@ -19,7 +19,7 @@ async function updateRecibidos(id, unidadesRecibidas) {
 async function updateDatos(id, uRecibidas, fechavencimiento) {
     return DetalleReporte.findByIdAndUpdate(
         id,
-        { uRecibidas, fechavencimiento},
+        {$set:{ uRecibidas, fechavencimiento}},
         { new: true } // devuelve el documento actualizado
     );
 }
@@ -75,7 +75,11 @@ const obtenerDetallesConProductoService = async (tim) => {
 
 const obtenerDetalleProductoServiceBySku = async (sku) => {
     const resultados = await DetalleReporte.aggregate([
-        { $match: { sku: String(sku) } },
+        { $match: { sku: String(sku),
+            tim: String(tim)
+         }
+        
+    },
         {
             $lookup: {
                 from: 'productos',
@@ -121,11 +125,16 @@ const obtenerDetalleProductoServiceBySku = async (sku) => {
 
     return resultados[0] || null;
 };
+
+async function marcarDetallesParaExpiracion(tim, fecha) {
+    return await DetalleReporte.updateMany({ tim }, { $set: { expireAt: fecha } });
+}
+
 async function deleteDetalleRep(id) {
     await DetalleReporte.findByIdAndDelete(id);
 }
+
 async function deleteDetallesReporte(tim) {
-    console.log(tim)
     return await DetalleReporte.deleteMany({ tim:tim });
 }
 
@@ -137,5 +146,6 @@ module.exports = {
     updateRecibidos,
     updateDatos,
     obtenerDetallesConProductoService,
-    obtenerDetalleProductoServiceBySku
+    obtenerDetalleProductoServiceBySku,
+    marcarDetallesParaExpiracion
 };

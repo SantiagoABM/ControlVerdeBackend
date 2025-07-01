@@ -6,11 +6,11 @@ const insertarDetalleReporte = async (req, res) => {
     try {
         const { socketId, detalleReporte, salaId } = req.body; // <- salaId enviado desde frontend
         const result = await detalleReporteService.insertarDetalleReporte(detalleReporte);
-        const resultado = await detalleReporteService.obtenerDetalleProductoServiceBySku(result.sku);
+        const resultado = await detalleReporteService.obtenerDetalleProductoServiceBySku(result.sku, result.tim);
 
         // Emitir a todos en la sala excepto al emisor
         req.io.to(salaId).except(socketId).emit('producto-agregado', resultado);
-
+        
         return res.status(201).json({
             message: 'Detalle del reporte insertado con éxito',
             resultado: resultado

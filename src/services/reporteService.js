@@ -21,6 +21,10 @@ async function buscarReportePorMotivo(motivo) {
     return reportes.map(r => r.tim);
 }
 
+async function marcarReporteParaExpiracion(tim, fecha) {
+    return await Reporte.updateOne({ tim }, { $set: { expireAt: fecha, estado: false } });
+}
+
 async function buscarReporte(reporte) {
     if (!reporte) throw new Error('Código Tim requerido');
     const report = await Reporte.findOne(
@@ -33,5 +37,6 @@ module.exports = {
     insertarReporte,
     deleteReporte,
     buscarReportePorMotivo,
-    buscarReporte
+    buscarReporte,
+    marcarReporteParaExpiracion
 };

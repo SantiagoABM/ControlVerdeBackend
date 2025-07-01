@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 
 const detalleReporteSchema = new mongoose.Schema({
-  // reporteId: {type: mongoose.Schema.ObjectId, ref: 'Reporte'},
-  // productoId: {type: mongoose.Schema.ObjectId, ref: 'Producto'},
   tim: Number,
   olpn: String,
   sku: String,
@@ -11,6 +9,9 @@ const detalleReporteSchema = new mongoose.Schema({
   fechavencimiento: String,
   observacion: { type: String, default: 'PERTENECE' },
   fastRegister: { type: Boolean, default: false },
+  expireAt: { type: Date, default: null }
 });
+
+detalleReporteSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model('DetalleReporte', detalleReporteSchema);
