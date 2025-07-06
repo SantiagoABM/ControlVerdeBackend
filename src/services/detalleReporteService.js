@@ -73,6 +73,62 @@ const obtenerDetallesConProductoService = async (tim) => {
     return resultados;
 };
 
+const obtenerDetalleProductoServiceBySkuYTims = async (sku, tims) => {
+    const resultados = await DetalleReporte.aggregate([
+        {
+            $match: {
+                sku: String(sku),
+                tim: { $in: tims.map(Number) }  // Asegúrate de que los tims sean números
+            }
+        },
+        {
+            $lookup: {
+                from: 'productos',
+                localField: 'sku',
+                foreignField: 'sku',
+                as: 'productoInfo'
+            }
+        },
+        {
+            $unwind: {
+                path: '$productoInfo',
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $addFields: {
+                cEnviadas: {
+                    $multiply: ['$uEnviadas', '$casePack']
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                tim: 1,
+                olpn: 1,
+                sku: 1,
+                ean: '$productoInfo.ean',
+                subdpto: '$productoInfo.subdpto',
+                descripcion: '$productoInfo.descripcion',
+                casePack: '$productoInfo.casePack',
+                uMedida: '$productoInfo.uMedida',
+                precioVigente: { $ifNull: ['$productoInfo.precioVigente', 0] },
+                costoPromedio: { $ifNull: ['$productoInfo.costoPromedio', 0] },
+                uEnviadas: 1,
+                uRecibidas: 1,
+                fechavencimiento: 1,
+                observacion: 1,
+                fastRegister: 1
+            }
+        }
+    ]);
+
+    return resultados;
+};
+
+
+
 const obtenerDetalleProductoServiceBySku = async (sku, tim) => {
     const resultados = await DetalleReporte.aggregate([
         { $match: { sku: String(sku),
@@ -147,5 +203,6 @@ module.exports = {
     updateDatos,
     obtenerDetallesConProductoService,
     obtenerDetalleProductoServiceBySku,
+    obtenerDetalleProductoServiceBySkuYTims,
     marcarDetallesParaExpiracion
 };

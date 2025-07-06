@@ -12,7 +12,7 @@ const insertarReporte = async (req, res) => {
             });
         }
         return res.status(400).json({
-            message: 'El reporte ya ha sido registrado'
+            message: 'El reporte ya ha sido registrada'
         });
     } catch (error) {
         return res.status(500).json({ error: 'Error al insertar el Reporte', detalle: error.message });

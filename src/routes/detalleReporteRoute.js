@@ -4,6 +4,7 @@ const detalleReporteController = require('../controllers/detalleReporteControlle
 
 //api/detallereportes
 router.get('/productos/:tim' , detalleReporteController.obtenerDetallesConProducto);
+router.get('/skumotivo' , detalleReporteController.obtenerDetalleProductosBySkuYMotivo);
 
 router.post('/add', detalleReporteController.insertarDetalleReporte);
 router.post('/update', detalleReporteController.updateRecibidos);
