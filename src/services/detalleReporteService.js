@@ -8,18 +8,18 @@ async function insertarDetalleReporteEnLote(detalleReportes) {
     return await DetalleReporte.insertMany(detalleReportes, { ordered: false });
 }
 
-async function updateRecibidos(id, unidadesRecibidas, idUsuario) {
+async function updateRecibidos(id, unidadesRecibidas) {
     return DetalleReporte.findByIdAndUpdate(
         id,
-        {$set :{ uRecibidas: unidadesRecibidas, usuario: idUsuario }}, // Asegúrate de que 'usuario' esté definido en el contexto
+        {$set :{ uRecibidas: unidadesRecibidas }}, // Asegúrate de que 'usuario' esté definido en el contexto
         { new: true } // devuelve el documento actualizado
     );
 }
 
-async function updateDatos(id, uRecibidas, fechavencimiento, idUsuario) {
+async function updateDatos(id, uRecibidas, fechavencimiento) {
     return DetalleReporte.findByIdAndUpdate(
         id,
-        {$set:{ uRecibidas, fechavencimiento , usuario: idUsuario}},
+        {$set:{ uRecibidas, fechavencimiento}},
         { new: true } // devuelve el documento actualizado
     );
 }
