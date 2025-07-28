@@ -174,7 +174,7 @@ const obtenerDetalleProductosBySkuYMotivo = async (req, res) => {
             return res.status(404).json({ mensaje: 'Detalle no encontrado' });
         }
 
-        return res.status(204).json(detalles);
+        return res.status(200).json(detalles);
     } catch (error) {
         console.error(error);
         return res.status(500).json({ mensaje: 'Error al obtener el producto' });
