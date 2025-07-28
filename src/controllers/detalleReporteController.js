@@ -160,7 +160,7 @@ const obtenerDetalleProducto = async (req, res) => {
 
 const obtenerDetalleProductosBySkuYMotivo = async (req, res) => {
     try {
-        const { sku, motivo } = req.body;
+        const { sku, motivo } = req.query;
         console.log(sku, motivo)
         const tims = await reporteService.buscarReportePorMotivo(motivo); // deber ser un array de tims
         console.log(tims);
