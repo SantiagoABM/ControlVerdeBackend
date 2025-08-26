@@ -20,15 +20,9 @@ async function buscarProductoPorCodigo(codigo) {
 }
 
 async function buscarProductoPorSubdpto(subdptos) {
-    if (!subdptos) throw new Error('Subdepartamentos requeridos');
-
-    // Buscar por SKU
-    const productos = await Producto.find({ subdpto: { $in: subdptos } }).lean();
-
-    // Si no se encontró, buscar por EAN
-    if (!productos) throw new Error('Nos se encontraron productos');
-    return productos;
+    return await Producto.find({ subdpto: { $in: subdptos } });
 }
+
 
 
 // async function buscarProductoPorCodigo(codigo) {
