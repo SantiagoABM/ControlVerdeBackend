@@ -19,6 +19,17 @@ async function buscarProductoPorCodigo(codigo) {
     return producto;
 }
 
+async function buscarProductoPorSubdpto(subdptos) {
+    if (!subdptos) throw new Error('Subdepartamentos requeridos');
+
+    // Buscar por SKU
+    const productos = await Producto.find({ subdpto: { $in: subdptos } }).lean();
+
+    // Si no se encontró, buscar por EAN
+    if (!productos) throw new Error('Nos se encontraron productos');
+    return productos;
+}
+
 
 // async function buscarProductoPorCodigo(codigo) {
 //     if (!codigo) throw new Error('Código requerido');
@@ -58,6 +69,14 @@ async function updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, m
     );
 }
 
+const actualizarProductosPorSkus = async (skus) => {
+    const resultado = await Producto.updateMany(
+        { sku: { $in: skus } },
+        { $set: { detalle: 'MARCA SENSIBLE' } }
+    );
+    return resultado;
+};
+
 const validateSkus = async (skus) => {
     return await Producto.find({ sku: { $in: skusUnicos } }).select('sku');
 };
@@ -66,7 +85,9 @@ module.exports = {
     insertarProducto,
     buscarProductoPorCodigo,
     insertarProductosEnLote,
+    actualizarProductosPorSkus,
     getProductosBySkus,
     updateProducto,
-    validateSkus
+    validateSkus,
+    buscarProductoPorSubdpto
 };

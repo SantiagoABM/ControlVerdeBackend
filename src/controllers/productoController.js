@@ -11,6 +11,25 @@ const insertarProducto = async (req, res) => {
     }
 };
 
+const obtenerProductosPorSubdptos = async (req, res) => {
+    try {
+        const subdptos = [
+            "J030101", "J030102", "J030104", "J030105", "J030106", "J030107", "J030201", "J030202", "J040101", "J040102", "J050101", "J050205", "J050301", "J050201", "J050306", "J050204", "J050202", "J050102", "J050302", "J060101", "J060102", "J060201", "J060202", "J070101", "J070102", "J070103", "J070107", "J070109"
+        ];
+        if (!Array.isArray(subdptos) || subdptos.length === 0) {
+            return res.status(400).json({ error: 'Lista de subdptos vacía o inválida' });
+        }
+        const productos = await productoService.buscarProductoPorSubdpto(subdptos);
+        res.status(200).json({
+            total: productos.length, // número de productos
+            productos,               // la lista completa
+        });
+    } catch (error) {
+        console.error('Error al obtener productos:', error);
+        res.status(500).json({ error: 'Error del servidor' });
+    }
+};
+
 const insertarLote = async (req, res) => {
     try {
         const productos = req.body;
@@ -47,7 +66,7 @@ const buscarProducto = async (req, res) => {
 
 const updateDatosProducto = async (req, res) => {
     try {
-        const { sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor,socketId } = req.body
+        const { sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, socketId } = req.body
         const result = await productoService.updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor);
 
         if (!result) {
@@ -64,20 +83,38 @@ const updateDatosProducto = async (req, res) => {
         return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
     }
 }
+const actualizarDetallePorSkus = async (req, res) => {
+    try {
+        const { skus } = req.body;
 
+        if (!Array.isArray(skus) || skus.length === 0) {
+            return res.status(400).json({ mensaje: 'Debe enviar una lista de SKUs válida.' });
+        }
+
+        const resultado = await productoService.actualizarProductosPorSkus(skus);
+
+        res.status(200).json({
+            mensaje: 'Productos actualizados correctamente.',
+            modificados: resultado.modifiedCount || resultado.nModified // según tu versión de Mongoose
+        });
+    } catch (error) {
+        console.error('Error al actualizar productos:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
 const getProductosBySkus = async (req, res) => {
-  const { skus } = req.body;
+    const { skus } = req.body;
 
-  if (!Array.isArray(skus)) {
-    return res.status(400).json({ message: 'SKUs inválidos' });
-  }
+    if (!Array.isArray(skus)) {
+        return res.status(400).json({ message: 'SKUs inválidos' });
+    }
 
-  try {
-    const productos = await productoService.getProductosBySkus(skus);
-    return res.status(200).json(productos);
-  } catch (error) {
-    return res.status(500).json({ message: 'Error al obtener productos' });
-  }
+    try {
+        const productos = await productoService.getProductosBySkus(skus);
+        return res.status(200).json(productos);
+    } catch (error) {
+        return res.status(500).json({ message: 'Error al obtener productos' });
+    }
 };
 
 
@@ -86,5 +123,7 @@ module.exports = {
     buscarProducto,
     insertarLote,
     getProductosBySkus,
-    updateDatosProducto
+    updateDatosProducto,
+    actualizarDetallePorSkus,
+    obtenerProductosPorSubdptos
 };
