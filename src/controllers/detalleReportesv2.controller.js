@@ -12,14 +12,18 @@ const insertarDetalleReporte = async (req, res) => {
         // Emitir a todos en la sala excepto al emisor
         req.io.to(salaId).except(socketId).emit('producto-agregado', resultado);
 
-        return res.status(201).json({
+        return res.status(200).json({
+            status: ENUMS.SUCCESS,
             message: 'Detalle del reporte insertado con éxito',
-            resultado: resultado
+            isError: false,
+            datos: resultado
         });
     } catch (error) {
-        return res.status(500).json({
-            error: 'Error al insertar el detalle del reporte',
-            detalle: error.message
+        return res.status(200).json({
+            status: ENUMS.ERROR,
+            message: error.message,
+            isError: true,
+            datos: null
         });
     }
 };
@@ -30,7 +34,12 @@ const insertarLoteReporte = async (req, res) => {
         const reportes = req.body;
 
         if (!Array.isArray(reportes) || reportes.length === 0) {
-            return res.status(400).json({ error: 'Se requiere un arreglo de reportes' });
+            return res.status(400).json({
+                status: ENUMS.ERROR,
+                message: 'Se requiere un arreglo de reportes',
+                isError: true,
+                datos: null
+            });
         }
 
         const skusLote = reportes.map(r => r.sku);
@@ -90,15 +99,20 @@ const insertarLoteReporte = async (req, res) => {
             await DetalleReporte.insertMany(detalles, { ordered: false });
         }
 
-        return res.status(201).json({
-            message: 'Lote procesado correctamente',
-            total: reportes.length,
-            productosAgregados: nuevosProductos.length,
-            detallesGuardados: detalles.length
+        return res.status(200).json({
+            status: ENUMS.SUCCESS,
+            message: 'Lote insertado con éxito Productos y Detalles ' + nuevosProductos.length + ' - ' + detalles.length,
+            isError: false,
+            datos: null
         });
 
     } catch (error) {
-        return res.status(500).json({ error: 'Error interno del servidor', detalle: error.message });
+        return res.status(400).json({
+            status: ENUMS.ERROR,
+            message: error.message,
+            isError: true,
+            datos: null
+        });
     }
 };
 
@@ -107,9 +121,19 @@ const obtenerDetallesConProducto = async (req, res) => {
     try {
         const { tim } = req.params;
         const detalles = await detalleReporteService.obtenerDetallesConProductoService(tim);
-        return res.json(detalles);
+        return res.status(200).json({
+            status: ENUMS.SUCCESS,
+            message: 'Detalles obtenidos con éxito',
+            isError: false,
+            datos: detalles
+        });
     } catch (error) {
-        return res.status(500).json({ mensaje: 'Error al obtener los detalles con información de productos' });
+        return res.status(200).json({
+            status: ENUMS.ERROR,
+            message: error.message,
+            isError: true,
+            datos: null
+        });
     }
 };
 
@@ -120,14 +144,28 @@ const updateRecibidos = async (req, res) => {
         const result = await detalleReporteService.updateRecibidos(id, uRecibidas, usuario)
 
         if (!result) {
-            return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
+            return res.status(200).json({
+                status: ENUMS.SUCCESS,
+                message: 'No se encontró el reporte con ese ID',
+                isError: false,
+                datos: null
+            });
         }
         req.io.to(salaId).except(socketId).emit('producto-actualizado', result);
 
-        return res.status(200).json(result);
+        return res.status(200).json({
+            status: ENUMS.SUCCESS,
+            message: 'Detalle del reporte actualizado con éxito',
+            isError: false,
+            datos: result
+        });
     } catch (error) {
-        console.error('❌ Error al actualizar uRecibidas:', error);
-        return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
+        return res.status(400).json({
+            status: ENUMS.ERROR,
+            message: 'Detalle del reporte insertado con éxito',
+            isError: true,
+            datos: null
+        });
     }
 }
 
@@ -138,14 +176,29 @@ const updateDatosDetalle = async (req, res) => {
         const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento, usuario);
 
         if (!result) {
-            return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
+            res.status(200).json({
+                status: ENUMS.SUCCESS,
+                message: 'No se encontró el reporte con ese ID',
+                isError: false,
+                datos: null
+            });
         }
 
         req.io.to(salaId).except(socketId).emit('producto-actualizado', result);
 
-        return res.status(200).json(result);
+        return res.status(200).json({
+            status: ENUMS.SUCCESS,
+            message: 'Detalle del reporte actualizado con éxito',
+            isError: false,
+            datos: result
+        });
     } catch (error) {
-        return res.status(500).json({ mensaje: 'Error al actualizar el producto' });
+        return res.status(400).json({
+            status: ENUMS.ERROR,
+            message: error.message,
+            isError: true,
+            datos: null
+        });
     }
 }
 
@@ -154,9 +207,19 @@ const obtenerDetalleProducto = async (req, res) => {
     try {
         const { tim } = req.params;
         const detalles = await detalleReporteService.obtenerDetallesConProductoService(tim);
-        return res.json(detalles);
+        res.status(200).json({
+            status: ENUMS.SUCCESS,
+            message: 'Detalles obtenidos con éxito',
+            isError: false,
+            datos: detalles
+        });
     } catch (error) {
-        return res.status(500).json({ mensaje: 'Error al obtener los detalles con información de productos' });
+        return res.status(400).json({
+            status: ENUMS.ERROR,
+            message: error.message,
+            isError: true,
+            datos: null
+        });
     }
 };
 const actualizarDetallePorSkus = async (req, res) => {
@@ -164,18 +227,29 @@ const actualizarDetallePorSkus = async (req, res) => {
         const { skus } = req.body;
 
         if (!Array.isArray(skus) || skus.length === 0) {
-            return res.status(400).json({ mensaje: 'Debe enviar una lista de SKUs válida.' });
+            return res.status(200).json({
+                status: ENUMS.ERROR,
+                message: 'Lista de SKUs vacía o inválida',
+                isError: false,
+                datos: resultado
+            });
         }
 
         const resultado = await detalleReporteService.actualizarProductosPorSkus(skus);
 
         res.status(200).json({
-            mensaje: 'Productos actualizados correctamente.',
-            modificados: resultado.modifiedCount || resultado.nModified // según tu versión de Mongoose
+            status: ENUMS.SUCCESS,
+            message: 'Detalles del reporte actualizados correctamente.',
+            isError: false,
+            datos: resultado
         });
     } catch (error) {
-        console.error('Error al actualizar productos:', error);
-        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+        return res.status(400).json({
+            status: ENUMS.ERROR,
+            message: error.message,
+            isError: true,
+            datos: null
+        });
     }
 };
 const obtenerDetalleProductosBySkuYMotivo = async (req, res) => {
@@ -183,21 +257,38 @@ const obtenerDetalleProductosBySkuYMotivo = async (req, res) => {
         const { sku, motivo } = req.body;
         console.log(sku, motivo)
         const tims = await reporteService.buscarReportePorMotivo(motivo); // deber ser un array de tims
-        console.log(tims);
         if (!Array.isArray(tims) || tims.length === 0) {
-            return res.status(404).json({ mensaje: 'No hay TIMs para ese motivo' });
+            return res.status(200).json({
+                status: ENUMS.SUCCESS,
+                message: 'No se encontraron reportes con ese motivo',
+                isError: false,
+                datos: null
+            });
         }
 
         const detalles = await detalleReporteService.obtenerDetalleProductoServiceBySkuYTims(sku, tims);
-        console.log(detalles);
         if (!detalles || detalles.length === 0) {
-            return res.status(404).json({ mensaje: 'Detalle no encontrado' });
+            res.status(200).json({
+                status: ENUMS.SUCCESS,
+                message: 'No se encontraron detalles para ese SKU y motivo',
+                isError: false,
+                datos: null
+            });
         }
 
-        return res.status(200).json({ respuesta: detalles });
+        return res.status(200).json({
+            status: ENUMS.SUCCESS,
+            message: 'Detalles obtenidos con éxito',
+            isError: false,
+            datos: detalles
+        });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ mensaje: 'Error al obtener el producto' });
+        return res.status(400).json({
+            status: ENUMS.ERROR,
+            message: error.message,
+            isError: true,
+            datos: null
+        });
     }
 };
 
@@ -209,10 +300,18 @@ const deleteDetalleReporte = async (req, res) => {
         await detalleReporteService.deleteDetalleRep(id);
         req.io.to(salaId).except(socketId).emit('producto-eliminado', id);
         return res.status(200).json({
-            message: 'Producto Eliminado Correctamente'
+            status: ENUMS.SUCCESS,
+            message: 'Detalle del reporte eliminado con éxito',
+            isError: false,
+            datos: null
         });
     } catch (error) {
-        return res.status(500).json({ mensaje: 'Error al eliminar el producto' });
+        return res.status(400).json({
+            status: ENUMS.ERROR,
+            message: error.message,
+            isError: true,
+            datos: null
+        });
     }
 }
 

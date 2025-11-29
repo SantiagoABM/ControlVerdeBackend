@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const config = require('../config');
 
-const uri = "mongodb+srv://barbozamujica109:tysonryx123@tottus.tvsqbky.mongodb.net/controlverde?retryWrites=true&w=majority&appName=Tottus";
+const uri = config.MONGOURI;
 
 mongoose.connect(uri, {
   useNewUrlParser: true,

@@ -9,7 +9,9 @@ const reporteSchema = new mongoose.Schema({
     placa: String,
     origen: String,
     destino: String,
-    fechaEnvio: String,
+    fechaEnvio: Date,
+    fechaLlegada: Date,
+    creadoPor: String,
     estado: {
         type: Boolean,
         default: true
@@ -19,7 +21,10 @@ const reporteSchema = new mongoose.Schema({
         default: null
     },
     motivo: String,
-}, { timestamps: false });
+
+}, {
+    timestamps: true
+});
 
 reporteSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 

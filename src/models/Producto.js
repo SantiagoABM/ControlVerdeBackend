@@ -11,10 +11,11 @@ const productoSchema = new mongoose.Schema({
   descripcion: { type: String, default: '' },
   marca: { type: String, default: '' },
   proveedor: { type: String, default: '' },
-  casePack: { type: Number, default: 0 },
+  casePack: { type: Number, default: 1 },
   costoPromedio: { type: Number, default: 0 },
   precioVigente: { type: Number, default: 0 },
   uMedida: { type: String, default: '' },
+  detalle: String
 }, {
   timestamps: true
 });

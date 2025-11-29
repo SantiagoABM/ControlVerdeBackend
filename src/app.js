@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const morgan = require('morgan');
@@ -7,7 +8,9 @@ const pkg = require('../package.json');
 const { Server } = require('socket.io');
 const helmet = require("helmet");
 //rutas
+const initialSetUp = require('./lib/initialSetUp'); // Inicializa el usuario administrador si no existe
 const testRoute = require('./routes/testRoute');
+const usuarioRoute = require('./routes/usuarioRoute');
 const productoRoute = require("./routes/productoRoute.js");
 const reporteRoute = require("./routes/reporteRoute.js");
 const detalleReporteRoute = require("./routes/detalleReporteRoute.js");
@@ -19,7 +22,9 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: { origin: '*' }
 });
-    
+
+initialSetUp.createAdmin(); // Llama a la función para inicializar el usuario administrador
+
 io.on('connection', (socket) => {
     console.log('Nuevo socket conectado:', socket.id);
     socket.on('joinSala', (salaId) => {
@@ -50,14 +55,18 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(cors());
 app.use(express.urlencoded({ extend: false }));
+// Map<userId, { token, expiresAt }>
+global.activeTokens = new Map();
 
 //rutas
 app.use((req, res, next) => {
     req.io = io;
     next();
 });
+
 app.use('/api', testRoute);
 app.use("/api/productos", productoRoute);
+app.use("/api/usuarios", usuarioRoute);
 app.use("/api/reportes", reporteRoute);
 app.use("/api/detallereportes", detalleReporteRoute);
 

@@ -21,6 +21,15 @@ async function buscarReportePorMotivo(motivo) {
     return reportes.map(r => r.tim);
 }
 
+async function buscarReportePorMotivov2(motivo) {
+    if (!motivo) throw new Error('Motivo requerido');
+    const reportes = await Reporte.find(
+        { motivo: motivo, estado: true},
+        { tim: 1, _id: 0 } 
+    );
+    return reportes.map(r => r.tim);
+}
+
 async function marcarReporteParaExpiracion(tim, fecha) {
     return await Reporte.updateOne({ tim }, { $set: { expireAt: fecha, estado: false } });
 }
@@ -31,6 +40,18 @@ async function buscarReporte(reporte) {
         { tim:  reporte }
     );
     return report;
+}
+
+async function buscarReportePorFechas(fechaInicio, fechaFin) {
+    if (!fechaInicio || !fechaFin) throw new Error('Fechas de inicio y fin son requeridas');
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaFin);
+    fin.setHours(23, 59, 59, 999);
+    const reportes = await Reporte.find({
+        fechaReporte: { $gte: inicio, $lte: fin },
+        estado: true
+    });
+    return reportes;
 }
 
 module.exports = {
