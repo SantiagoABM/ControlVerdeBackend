@@ -2,9 +2,9 @@ const { config } = require("dotenv");
 config();
 
 const PORT = process.env.PORT || 3000;
-const BANDERA = false;// true para produccion, false para desarrollo
+const BANDERA = true;// true para produccion, false para desarrollo
 // const MONGOURI = BANDERA ? process.env.MONGO_URI_PRODUCCION || "mongodb+srv://barbozamujica109:tysonryx123@tottus.tvsqbky.mongodb.net/controlverde?retryWrites=true&w=majority&appName=Tottus" : process.env.MONGO_URI_DESARROLLO || "mongodb://localhost:27017/tottus";
-const MONGOURI = BANDERA ? process.env.MONGO_URI_SOLUCIONES || "mongodb+srv://barbozamujica109:tysonryx123@tottus.tvsqbky.mongodb.net/controlverde?retryWrites=true&w=majority&appName=TottusPrueba" : process.env.MONGO_URI_DESARROLLO || "mongodb://localhost:27017/tottus";
+const MONGOURI = BANDERA ? process.env.MONGO_URI_SOLUCIONES || "mongodb+srv://barbozamujica109:tysonryx123@tottus.tvsqbky.mongodb.net/controlverdePrueba?retryWrites=true&w=majority&appName=Tottus" : process.env.MONGO_URI_DESARROLLO || "mongodb://localhost:27017/tottus";
 const JWT_SECRET = process.env.JWT_SECRET || "22U312UI3Y12IU3Y12UEY1DYSN128Y1";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@gmail.com";
 const ADMIN_NAME = process.env.ADMIN_NAME || "ADMIN";
