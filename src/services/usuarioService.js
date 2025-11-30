@@ -18,19 +18,19 @@ exports.registrarUsuario = async (datos) => {
 
 exports.autenticarUsuario = async ({ correo, password }) => {
     const usuario = await Usuario.findOne({ correo });
-    if (!usuario) throw new Error('Credenciales inválidas.');
+    if (!usuario) throw new Error('Credenciales por correo inválidas.');
 
     const match = await authMiddleware.verificarPassword(password, usuario.password);
-    if (!match) throw new Error('Credenciales inválidas.');
+    if (!match) throw new Error('Credenciales por correop inválidas.');
     return usuario;
 };
 
 exports.autenticarUsuarioPorDni = async (dni, password) => {
     const usuario = await Usuario.findOne({ dni });
-    if (!usuario) throw new Error('Credenciales inválidas.');
+    if (!usuario) throw new Error('Credenciales por dni inválidas.');
 
     const match = await authMiddleware.verificarPassword(password, usuario.password);
-    if (!match) throw new Error('Credenciales inválidas.');
+    if (!match) throw new Error('Credenciales por dnip inválidas.');
     return usuario;
 };
 

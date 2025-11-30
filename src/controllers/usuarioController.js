@@ -48,16 +48,16 @@ exports.login = async (req, res) => {
         let usuario;
 
         // 🔹 1. Login usando correo o DNI
-        if (correo) {
+        if (correo != null) {
             usuario = await usuarioService.autenticarUsuario(correo, password);
-        } else if (dni) {
+        } else if (dni != null) {
             usuario = await usuarioService.autenticarUsuarioPorDni(dni, password);
         } else {
             throw new Error('Debe proporcionar un correo o un DNI para iniciar sesión.');
         }
 
         if (!usuario) {
-            return res.status(404).json({
+            return res.status(402).json({
                 status: ENUMS.ERROR,
                 message: "Credenciales inválidas.",
                 isError: true,
@@ -99,7 +99,7 @@ exports.login = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(401).json({
+        res.status(404).json({
             status: ENUMS.ERROR,
             message: error.message,
             isError: true,
