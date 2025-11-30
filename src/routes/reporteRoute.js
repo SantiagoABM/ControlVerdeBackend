@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const reporteController = require('../controllers/reporteController.js');
+const reporteController = require('../controllers/reportev2.controller.js');
 const { verificarToken } = require('../middlewares/authMiddleware.js');
 
 // POST /api/reportes

@@ -2,6 +2,7 @@ const detalleReporteService = require('../services/detalleReporteService.js');
 const Producto = require('../models/Producto.js');
 const reporteService = require('../services/reporteService.js');
 const DetalleReporte = require('../models/DetalleReporte.js');
+const ENUMS = require('../utils/constantes.js');
 
 const insertarDetalleReporte = async (req, res) => {
     try {

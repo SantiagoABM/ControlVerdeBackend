@@ -1,4 +1,6 @@
 const productoService = require('../services/productoService.js');
+const ENUMS = require('../utils/constantes.js');
+
 
 const insertarProducto = async (req, res) => {
     try {

@@ -1,5 +1,6 @@
 const reporteService = require('../services/reportev2.service.js');
 const detalleReporteService = require('../services/detalleReporteService.js');
+const ENUMS = require('../utils/constantes.js');
 
 const insertarReporte = async (req, res) => {
     try {

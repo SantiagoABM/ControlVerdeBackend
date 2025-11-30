@@ -53,7 +53,12 @@ exports.login = async (req, res) => {
         } else if (dni != null) {
             usuario = await usuarioService.autenticarUsuarioPorDni(dni, password);
         } else {
-            throw new Error('Debe proporcionar un correo o un DNI para iniciar sesión.');
+            return res.status(200).json({
+                status: ENUMS.ERROR,
+                message: "Se requiere correo o DNI para iniciar sesión.",
+                isError: true,
+                datos: null
+            });
         }
 
         if (!usuario) {
