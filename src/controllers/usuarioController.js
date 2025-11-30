@@ -57,7 +57,7 @@ exports.login = async (req, res) => {
         }
 
         if (!usuario) {
-            return res.status(402).json({
+            return res.status(200).json({
                 status: ENUMS.ERROR,
                 message: "Credenciales inválidas.",
                 isError: true,
@@ -68,7 +68,7 @@ exports.login = async (req, res) => {
         // 🔒 2. Validar acceso de administrador → por rol
         if (admin === true) {
             if (usuario.rol !== "administrador") {
-                return res.status(403).json({
+                return res.status(200).json({
                     status: ENUMS.ERROR,
                     message: "Acceso denegado: el usuario no tiene rol de administrador.",
                     isError: true,
@@ -99,7 +99,7 @@ exports.login = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(404).json({
+        res.status(401).json({
             status: ENUMS.ERROR,
             message: error.message,
             isError: true,
