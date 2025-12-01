@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const detalleReporteController = require('../controllers/detalleReportesv2.controller.js');
-const { verificarToken, requiereRol } = require('../middlewares/authMiddleware.js');
+const { verificarToken } = require('../middlewares/authMiddleware.js');
 
 
 //api/detallereportes

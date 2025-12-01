@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productoController = require('../controllers/productoController.js');
+const { verificarToken } = require('../middlewares/authMiddleware.js');
 
 // POST /api/productos
 router.get('/buscar/:codigo', verificarToken, productoController.buscarProducto);
