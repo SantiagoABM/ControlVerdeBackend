@@ -129,7 +129,7 @@ const obtenerDetallesConProducto = async (req, res) => {
             datos: detalles
         });
     } catch (error) {
-        return res.status(200).json({
+        return res.status(400).json({
             status: ENUMS.ERROR,
             message: error.message,
             isError: true,

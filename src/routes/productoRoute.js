@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const productoController = require('../controllers/productoController.js');
+const productoController = require('../controllers/productov2.controller.js');
 const { verificarToken } = require('../middlewares/authMiddleware.js');
 
 // POST /api/productos
