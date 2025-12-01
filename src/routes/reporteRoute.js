@@ -9,6 +9,6 @@ router.get('/reporte/:tim', reporteController.buscarReporte);
 
 router.post('/add', reporteController.insertarReporte);
 
-router.delete('/deleterdr/:tim', reporteController.eliminarReporteyDetalles);
+router.get('/deleterdr/:tim', reporteController.eliminarReporteyDetalles);
 
 module.exports = router;

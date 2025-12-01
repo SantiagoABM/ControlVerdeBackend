@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const SECRET = process.env.JWT_SECRET || 'secreto';
 const bcrypt = require('bcryptjs');
+const ENUMS = require('../utils/constantes.js');
 
 exports.encriptarPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
@@ -19,7 +20,7 @@ exports.verificarToken = (req, res, next) => {
   let token = req.headers["authorization"];
 
   if (!token) {
-    return res.status(401).json({ mensaje: "Token no proporcionado" });
+    return res.status(402).json({ mensaje: "Token no proporcionado" });
   }
 
   // Limpieza de formato: "Bearer xxxx"
@@ -34,29 +35,32 @@ exports.verificarToken = (req, res, next) => {
     const serverToken = activeTokens.get(userId);
 
     if (!serverToken) {
-      return res.status(401).json({
-        succes: false,
-        code: 4,
-        mensaje: "Token expirado, eliminado o no registrado en el servidor"
+      return res.status(403).json({
+        status: ENUMS.ERROR,
+        message: "Token inválido",
+        isError: true,
+        datos: null
       });
     }
 
     // Verificar que el token coincida exactamente
     if (serverToken.token !== token) {
-      return res.status(401).json({
-        succes: false,
-        code: 4,
-        mensaje: "Token inválido: se ha generado un nuevo token. Inicia sesión nuevamente."
+      return res.status(403).json({
+        status: ENUMS.ERROR,
+        message: 'Token inválido: Inicie sesión nuevamente',
+        isError: true,
+        datos: null
       });
     }
 
     // Verificar expiración manual del servidor
     if (Date.now() > serverToken.expiresAt) {
       activeTokens.delete(userId);
-      return res.status(401).json({
-        succes: false,
-        code: 4,
-        mensaje: "Token expirado"
+      return res.status(403).json({
+        status: ENUMS.ERROR,
+        message: 'Su sesión ha expirado, por favor inicie sesión nuevamente',
+        isError: true,
+        datos: null
       });
     }
 
@@ -65,10 +69,11 @@ exports.verificarToken = (req, res, next) => {
     next();
 
   } catch (err) {
-    return res.status(401).json({
-      succes: false,
-      code: 4,
-      mensaje: "Token inválido o expirado"
+    return res.status(403).json({
+      status: ENUMS.ERROR,
+      message: err.message,
+      isError: true,
+      datos: null
     });
   }
 };
