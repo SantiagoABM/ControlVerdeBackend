@@ -8,11 +8,11 @@ const { verificarToken } = require('../middlewares/authMiddleware.js');
 router.get('/productos/:tim', verificarToken, detalleReporteController.obtenerDetallesConProducto);
 router.get('/skumotivo', verificarToken, detalleReporteController.obtenerDetalleProductosBySkuYMotivo);
 
-router.post('/add', detalleReporteController.insertarDetalleReporte);
-router.post('/update', detalleReporteController.updateRecibidos);
-router.post('/updatedr', detalleReporteController.updateDatosDetalle);
-router.post('/lote', detalleReporteController.insertarLoteReporte);
+router.post('/add', verificarToken,detalleReporteController.insertarDetalleReporte);
+router.post('/update', verificarToken,detalleReporteController.updateRecibidos);
+router.post('/updatedr',verificarToken, detalleReporteController.updateDatosDetalle);
+router.post('/lote', verificarToken,detalleReporteController.insertarLoteReporte);
 
-router.delete('/delete/:id', detalleReporteController.deleteDetalleReporte);
+router.delete('/delete/:id',verificarToken, detalleReporteController.deleteDetalleReporte);
 
 module.exports = router;

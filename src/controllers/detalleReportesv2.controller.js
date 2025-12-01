@@ -163,7 +163,7 @@ const updateRecibidos = async (req, res) => {
     } catch (error) {
         return res.status(400).json({
             status: ENUMS.ERROR,
-            message: 'Detalle del reporte insertado con éxito',
+            message: error.message,
             isError: true,
             datos: null
         });
