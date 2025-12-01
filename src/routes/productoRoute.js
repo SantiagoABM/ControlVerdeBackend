@@ -3,10 +3,10 @@ const router = express.Router();
 const productoController = require('../controllers/productoController.js');
 
 // POST /api/productos
-router.get('/buscar/:codigo', productoController.buscarProducto);
-router.put('/productos/detalle', productoController.actualizarDetallePorSkus);
-router.post('/por-subdptos', productoController.obtenerProductosPorSubdptos);
-router.post('/add', productoController.insertarProducto);
+router.get('/buscar/:codigo', verificarToken, productoController.buscarProducto);
+router.put('/productos/detalle', verificarToken, productoController.actualizarDetallePorSkus);
+router.post('/por-subdptos', verificarToken, productoController.obtenerProductosPorSubdptos);
+router.post('/add', verificarToken, productoController.insertarProducto);
 router.post('/updatep', productoController.updateDatosProducto)
 router.post('/lote', productoController.insertarLote);
 router.post('/by-skus', productoController.getProductosBySkus);

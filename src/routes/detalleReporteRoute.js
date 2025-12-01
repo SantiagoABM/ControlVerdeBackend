@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const detalleReporteController = require('../controllers/detalleReporteController.js');
+const detalleReporteController = require('../controllers/detalleReportesv2.controller.js');
 const { verificarToken, requiereRol } = require('../middlewares/authMiddleware.js');
 
 
 //api/detallereportes
-router.get('/productos/:tim', detalleReporteController.obtenerDetallesConProducto);
-router.get('/skumotivo', verificarToken, requiereRol("administrador", "supervisor"), detalleReporteController.obtenerDetalleProductosBySkuYMotivo);
+router.get('/productos/:tim', verificarToken, detalleReporteController.obtenerDetallesConProducto);
+router.get('/skumotivo', verificarToken, detalleReporteController.obtenerDetalleProductosBySkuYMotivo);
 
 router.post('/add', detalleReporteController.insertarDetalleReporte);
 router.post('/update', detalleReporteController.updateRecibidos);
