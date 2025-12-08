@@ -4,12 +4,15 @@ const productoController = require('../controllers/productov2.controller.js');
 const { verificarToken } = require('../middlewares/authMiddleware.js');
 
 // POST /api/productos
+router.get('/unico/:campo', verificarToken, productoController.obtenerListaUnica);
 router.get('/buscar/:codigo', verificarToken, productoController.buscarProducto);
-router.put('/productos/detalle', verificarToken, productoController.actualizarDetallePorSkus);
+router.post('/filtrar', verificarToken, productoController.buscarProductosFiltrados);
+router.post('/productos/detalle', verificarToken, productoController.actualizarDetallePorSkus);
 router.post('/por-subdptos', verificarToken, productoController.obtenerProductosPorSubdptos);
-router.post('/add', verificarToken, productoController.insertarProducto);
-router.post('/updatep', productoController.updateDatosProducto)
-router.post('/lote', productoController.insertarLote);
-router.post('/by-skus', productoController.getProductosBySkus);
+router.post('/add', verificarToken,productoController.insertarProducto);
+router.post('/updatep', verificarToken,productoController.updateDatosProducto)
+router.post('/lote', verificarToken, productoController.insertarLote);
+router.post('/by-skus', verificarToken,productoController.getProductosBySkus);
+router.post('/:id', verificarToken,productoController.eliminarProducto);
 
 module.exports = router;

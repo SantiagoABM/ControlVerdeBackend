@@ -15,9 +15,12 @@ const productoSchema = new mongoose.Schema({
   costoPromedio: { type: Number, default: 0 },
   precioVigente: { type: Number, default: 0 },
   uMedida: { type: String, default: '' },
-  detalle: String
+  detalle: String,
+  marcaSensible: {type: Boolean, default: false}
 }, {
   timestamps: true
 });
+
+productoSchema.index({ sku: 1, ean: 1, subdpto: 1 });
 
 module.exports = mongoose.model('Producto', productoSchema);

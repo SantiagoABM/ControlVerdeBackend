@@ -7,23 +7,57 @@ const insertarProducto = async (req, res) => {
         const producto = await productoService.insertarProducto(req.body);
         if (!producto) {
             res.status(200).json({
-                status: ENUMS.ERROR,
+                success: ENUMS.ERROR,
                 message: 'No se ha podido crear el producto.',
-                isError: true,
                 datos: null
             });
         }
         res.status(200).json({
-            status: ENUMS.SUCCESS,
+            success: ENUMS.SUCCESS,
             message: 'Se guardó el producto exitosamente.',
-            isError: true,
             datos: null
         });
     } catch (error) {
         res.status(400).json({
-            status: ENUMS.ERROR,
+            success: ENUMS.ERROR,
             message: error.message,
-            isError: true,
+            datos: null
+        });
+    }
+};
+
+const obtenerListaUnica = async (req, res) => {
+    try {
+        const { campo } = req.params;
+
+        // Validar campo permitido para evitar inyección
+        const camposPermitidos = [
+            "marca",
+            "proveedor",
+            "subdpto",
+            "uMedida"
+        ];
+
+        if (!camposPermitidos.includes(campo)) {
+            return res.status(400).json({
+                success: ENUMS.ERROR,
+                message: "Campo no permitido",
+                datos: null
+            });
+        }
+
+        const valores = await productoService.obtenerValoresUnicos(campo);
+
+        return res.status(200).json({
+            success: ENUMS.SUCCESS,
+            message: "Valores obtenidos",
+            datos: valores
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: ENUMS.ERROR,
+            message: error.message,
             datos: null
         });
     }
@@ -36,25 +70,23 @@ const obtenerProductosPorSubdptos = async (req, res) => {
         ];
         if (!Array.isArray(subdptos) || subdptos.length === 0) {
             res.status(200).json({
-                status: ENUMS.ERROR,
+                success: ENUMS.ERROR,
                 message: 'Lista de subdptos vacía o inválida',
-                isError: true,
                 datos: null
             });
         }
         const productos = await productoService.buscarProductoPorSubdpto(subdptos);
         res.status(200).json({
-            status: ENUMS.SUCCESS,
+            success: ENUMS.SUCCESS,
             message: 'No se ha podido crear el usuario.',
-            isError: false,
+
             datos: productos,
             total: productos.length
         });
     } catch (error) {
         res.status(400).json({
-            status: ENUMS.ERROR,
+            success: ENUMS.ERROR,
             message: error.message,
-            isError: true,
             datos: null
         });
     }
@@ -65,31 +97,30 @@ const insertarLote = async (req, res) => {
         const productos = req.body;
         if (!productos || !Array.isArray(productos) || productos.length === 0) {
             res.status(200).json({
-                status: ENUMS.ERROR,
+                success: ENUMS.ERROR,
                 message: 'Se esperaba un arreglo de productos',
-                isError: true,
+
                 datos: null
             });
         }
 
         const insertados = await productoService.insertarProductosEnLote(productos);
         res.status(200).json({
-            status: ENUMS.SUCCESS,
+            success: ENUMS.SUCCESS,
             message: 'Lote insertado',
-            isError: false,
+
             datos: null,
             total: insertados.length
         });
     } catch (error) {
         res.status(400).json({
-            status: ENUMS.ERROR,
+            success: ENUMS.ERROR,
             message: error.message,
-            isError: true,
+
             datos: null
         });
     }
 };
-
 
 const buscarProducto = async (req, res) => {
     const { codigo } = req.params;
@@ -98,24 +129,66 @@ const buscarProducto = async (req, res) => {
         const producto = await productoService.buscarProductoPorCodigo(codigo);
 
         if (!producto) {
-            res.status(200).json({
-                status: ENUMS.SUCCESS,
+            return res.status(200).json({
+                success: ENUMS.SUCCESS,
                 message: 'Producto no encontrado',
-                isError: false,
+
                 datos: null
             });
         }
-        res.status(200).json({
-            status: ENUMS.SUCCESS,
+        return res.status(200).json({
+            success: ENUMS.SUCCESS,
             message: 'Producto encontrado',
-            isError: false,
+
             datos: producto
         });
     } catch (error) {
         res.status(400).json({
-            status: ENUMS.ERROR,
+            success: ENUMS.ERROR,
             message: error.message,
-            isError: true,
+
+            datos: null
+        });
+    }
+};
+
+const buscarProductosFiltrados = async (req, res) => {
+    try {
+        const {
+            ean,
+            sku,
+            subdpto,
+            precio,
+            casePack,
+            descripcion,
+            proveedor,
+            marca
+        } = req.body;
+
+        const productos = await productoService.filtrarProductos({
+            ean,
+            sku,
+            subdpto,
+            precio,
+            casePack,
+            descripcion,
+            proveedor,
+            marca
+        });
+
+        return res.status(200).json({
+            success: ENUMS.SUCCESS,
+            message: productos.length > 0
+                ? 'Productos encontrados'
+                : 'No se encontraron productos con los filtros especificados',
+            datos: productos
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(400).json({
+            success: ENUMS.ERROR,
+            message: error.message || 'Error al buscar productos',
             datos: null
         });
     }
@@ -123,14 +196,14 @@ const buscarProducto = async (req, res) => {
 
 const updateDatosProducto = async (req, res) => {
     try {
-        const { sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, socketId } = req.body
-        const result = await productoService.updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor);
+        const { sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, socketId, subdpto, descripcion, marcaSensible } = req.body
+        const result = await productoService.updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, subdpto, descripcion, marcaSensible);
 
         if (!result) {
             res.status(200).json({
-                status: ENUMS.SUCCESS,
+                success: ENUMS.SUCCESS,
                 message: 'No se encontró el reporte con ese ID',
-                isError: false,
+
                 datos: null
             });
         }
@@ -141,18 +214,18 @@ const updateDatosProducto = async (req, res) => {
             }
         });
         res.status(200).json({
-                status: ENUMS.SUCCESS,
-                message: 'Se actualizó el producto correctamente',
-                isError: false,
-                datos: result
-            });
+            success: ENUMS.SUCCESS,
+            message: 'Se actualizó el producto correctamente',
+
+            datos: result
+        });
     } catch (error) {
         res.status(400).json({
-                status: ENUMS.ERROR,
-                message: error.message,
-                isError: true,
-                datos: null
-            });
+            success: ENUMS.ERROR,
+            message: error.message,
+
+            datos: null
+        });
     }
 }
 const actualizarDetallePorSkus = async (req, res) => {
@@ -161,9 +234,9 @@ const actualizarDetallePorSkus = async (req, res) => {
 
         if (!Array.isArray(skus) || skus.length === 0) {
             res.status(400).json({
-                status: ENUMS.ERROR,
+                success: ENUMS.ERROR,
                 message: 'Lista de SKUs vacía o inválida',
-                isError: true,
+
                 datos: null
             });
         }
@@ -171,19 +244,17 @@ const actualizarDetallePorSkus = async (req, res) => {
         const resultado = await productoService.actualizarProductosPorSkus(skus);
 
         res.status(200).json({
-                status: ENUMS.SUCCESS,
-                message: 'Productos actualizados correctamente.',
-                isError: false,
-                datos: resultado,
-                rows: resultado.modifiedCount || resultado.nModified
-            });
+            success: ENUMS.SUCCESS,
+            message: 'Productos actualizados correctamente.',
+            datos: resultado,
+            rows: resultado.modifiedCount || resultado.nModified
+        });
     } catch (error) {
         res.status(400).json({
-                status: ENUMS.ERROR,
-                message: error.message,
-                isError: true,
-                datos: null
-            });
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null
+        });
     }
 };
 const getProductosBySkus = async (req, res) => {
@@ -191,38 +262,64 @@ const getProductosBySkus = async (req, res) => {
 
     if (!Array.isArray(skus)) {
         res.status(400).json({
-                status: ENUMS.ERROR,
-                message: 'sKUs inválidos',
-                isError: true,
-                datos: null
-            });
+            success: ENUMS.ERROR,
+            message: 'sKUs inválidos',
+            datos: null
+        });
     }
 
     try {
         const productos = await productoService.getProductosBySkus(skus);
         res.status(200).json({
-                status: ENUMS.SUCCESS,
-                message: 'Productos obtenidos correctamente.',
-                isError: false,
-                datos: productos
-            });
+            success: ENUMS.SUCCESS,
+            message: 'Productos obtenidos correctamente.',
+
+            datos: productos
+        });
     } catch (error) {
         res.status(400).json({
-                status: ENUMS.ERROR,
-                message: error.message,
-                isError: true,
-                datos: null
-            });
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null
+        });
     }
 };
 
+const eliminarProducto = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await productoService.eliminarProducto(id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Producto no encontrado",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Producto eliminado correctamente",
+    });
+  } catch (error) {
+    console.error("Error eliminando producto:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    });
+  }
+};
 
 module.exports = {
+    obtenerListaUnica,
     insertarProducto,
     buscarProducto,
     insertarLote,
     getProductosBySkus,
     updateDatosProducto,
     actualizarDetallePorSkus,
-    obtenerProductosPorSubdptos
+    obtenerProductosPorSubdptos,
+    buscarProductosFiltrados,
+    eliminarProducto
 };

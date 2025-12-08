@@ -9,16 +9,15 @@ const detalleReporteSchema = new mongoose.Schema({
   fechavencimiento: String,
   observacion: { type: String, default: 'PERTENECE' },
   fastRegister: { type: Boolean, default: false },
-  usuario: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }
+  modificadoPor: String,
+  expireAt: Date
 },
   {
     timestamps: true
   }
 );
 
+detalleReporteSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
 detalleReporteSchema.index({ tim: 1 });
 
 module.exports = mongoose.model('DetalleReporte', detalleReporteSchema);

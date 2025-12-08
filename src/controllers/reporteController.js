@@ -59,16 +59,15 @@ const eliminarReporteyDetalles = async (req, res) => {
         await reporteService.marcarReporteParaExpiracion(tim, fechaExpiracion);
 
         res.status(200).json({
-            status: ENUMS.SUCCESS,
+            success: ENUMS.SUCCESS,
             message: 'Reporte y detalles serán eliminados en 2 días',
-            isError: false,
+            
             datos: null
         });
     } catch (error) {
         res.status(400).json({
-            status: ENUMS.ERROR,
+            success: ENUMS.ERROR,
             message: error.message,
-            isError: true,
             datos: null
         });
     }

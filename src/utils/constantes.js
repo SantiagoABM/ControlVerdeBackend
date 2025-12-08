@@ -1,5 +1,6 @@
-const ENUMS = {
-    ERROR : 'ERROR',
-    SUCCESS : 'SUCCESS',
-    WARNING : 'WARNING',
-}
+const ENUMS = Object.freeze({
+    ERROR: false,
+    SUCCESS: true,
+});
+
+module.exports = ENUMS;   // ✔ exportas el OBJETO directamente

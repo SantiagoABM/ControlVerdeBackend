@@ -50,9 +50,56 @@ exports.buscarUsuarioPorCorreo = async (correo) => {
     return usuario;
 };
 
+exports.obtenerValoresUnicos = async (campo) => {
+    return await Usuario.distinct(campo);
+}
+
 exports.buscarUsuarioPorDni = async (correo) => {
     if (!correo) throw new Error('Dni de usuario requerido.');
     const usuario = await Usuario.findOne({ dni: dni });
     if (!usuario) throw new Error('Usuario no encontrado.');
     return usuario;
 };
+exports.filtrarUsuarios = async (filtros) => {
+    const { nombre, correo, rol, activo, dni } = filtros;
+
+    const query = {};
+
+    if (nombre) query.nombre = { $regex: nombre, $options: "i" };
+    if (correo) query.correo = { $regex: correo, $options: "i" };
+    if (rol) query.rol = rol;
+    if (dni) query.dni = dni;
+    if (activo !== undefined) query.activo = activo;
+    const usuarios = await Usuario.find(query).select('-password'); // No devolver password
+    console.log(usuarios)
+    return usuarios;
+}
+
+exports.actualizarUsuario = async (id, data) => {
+    const camposPermitidos = [
+        "dni",
+        "telefono",
+        "tienda",
+        "correo",
+        "nombre",
+        "apellido",
+        "rol",
+        "esAdmin",
+        "activo"
+    ];
+
+    // Filtrar campos no permitidos (evitar sobreescritura de password o dni)
+    const datosActualizados = {};
+    for (const key of camposPermitidos) {
+        if (data[key] !== undefined) {
+            datosActualizados[key] = data[key];
+        }
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate(id, datosActualizados, {
+        new: true,
+        runValidators: true,
+    }).select('-password');
+
+    return usuario;
+}

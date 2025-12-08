@@ -65,6 +65,7 @@ const obtenerDetallesConProductoService = async (tim) => {
                 uRecibidas: 1,
                 fechavencimiento: 1,
                 observacion: 1,
+                marcaSensible: { $ifNull: ['$productoInfo.marcaSensible', false] },
                 fastRegister: 1
             }
         }

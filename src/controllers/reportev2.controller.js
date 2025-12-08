@@ -7,9 +7,9 @@ const insertarReporte = async (req, res) => {
         const { tim, creadoPor } = req.body;
         if (!creadoPor) {
             return res.status(400).json({
-                status: ENUMS.ERROR,
+                success: ENUMS.ERROR,
                 message: 'El campo usuario es obligatorio.',
-                isError: false,
+                
                 datos: null
             });
         }
@@ -17,23 +17,22 @@ const insertarReporte = async (req, res) => {
         if (!response) {
             await reporteService.insertarReporte(req.body);
             res.status(200).json({
-                status: ENUMS.SUCCESS,
+                success: ENUMS.SUCCESS,
                 message: 'Reporte insertado con éxito',
-                isError: false,
+                
                 datos: null
             });
         }
         res.status(200).json({
-            status: ENUMS.ERROR,
+            success: ENUMS.ERROR,
             message: 'El reporte ya existe',
-            isError: false,
+            
             datos: null
         });
     } catch (error) {
         return res.status(400).json({
-            status: ENUMS.SUCCESS,
+            success: ENUMS.SUCCESS,
             message: error.message,
-            isError: true,
             datos: null
         });
     }
@@ -46,27 +45,55 @@ const buscarPorMotivo = async (req, res) => {
         const resultados = await reporteService.buscarReportePorMotivo(motivo);
         if (resultados.length === 0) {
             return res.status(200).json({
-                status: ENUMS.SUCCESS,
+                success: ENUMS.SUCCESS,
                 message: 'No se encontraron reportes con el motivo especificado',
-                isError: false,
+                
                 datos: []
             });
         }
         return res.status(200).json({
-            status: ENUMS.SUCCESS,
+            success: ENUMS.SUCCESS,
             message: 'Reportes encontrados con éxito',
-            isError: false,
+            
             datos: resultados
         });
     } catch (error) {
         return res.status(400).json({
-            status: ENUMS.ERROR,
+            success: ENUMS.ERROR,
             message: error.message,
-            isError: true,
             datos: null
         });
     }
 };
+
+const buscarPorMotivov2 = async (req, res) => {
+    try {
+        const { motivo } = req.query;
+
+        const resultados = await reporteService.buscarReportePorMotivov2(motivo);
+        if (resultados.length === 0) {
+            return res.status(200).json({
+                success: ENUMS.SUCCESS,
+                message: 'No se encontraron reportes con el motivo especificado',
+                
+                datos: []
+            });
+        }
+        return res.status(200).json({
+            success: ENUMS.SUCCESS,
+            message: 'Reportes encontrados con éxito',
+            
+            datos: resultados
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null
+        });
+    }
+};
+
 
 const buscarReporte = async (req, res) => {
     const { tim } = req.params;
@@ -76,24 +103,23 @@ const buscarReporte = async (req, res) => {
 
         if (!reporte) {
             return res.status(200).json({
-                status: ENUMS.SUCCESS,
+                success: ENUMS.SUCCESS,
                 message: 'Reporte no se ha encontrado o no existe.',
-                isError: false,
+                
                 datos: null
             });
         }
 
         return res.status(200).json({
-            status: ENUMS.SUCCESS,
+            success: ENUMS.SUCCESS,
             message: 'Reporte encontrado con éxito',
-            isError: false,
+            
             datos: reporte
         });
     } catch (error) {
         return res.status(400).json({
-            status: ENUMS.ERROR,
+            success: ENUMS.ERROR,
             message: error.message,
-            isError: true,
             datos: null
         });
     }
@@ -109,16 +135,15 @@ const eliminarReporteyDetalles = async (req, res) => {
         await reporteService.marcarReporteParaExpiracion(tim, fechaExpiracion);
 
         res.status(200).json({
-            status: ENUMS.SUCCESS,
+            success: ENUMS.SUCCESS,
             message: 'Reporte y detalles serán eliminados en 2 días',
-            isError: false,
+            
             datos: null
         });
     } catch (error) {
         res.status(400).json({
-            status: ENUMS.ERROR,
+            success: ENUMS.ERROR,
             message: error.message,
-            isError: true,
             datos: null
         });
     }
@@ -130,24 +155,23 @@ const buscarPorFechas = async (req, res) => {
         const resultados = await reporteService.buscarReportePorFechas(fechaInicio, fechaFin);
         if (resultados.length === 0) {
             return res.status(200).json({
-                status: ENUMS.SUCCESS,
+                success: ENUMS.SUCCESS,
                 message: 'No se encontraron reportes en el rango de fechas especificado',
-                isError: false,
+                
                 datos: []
             });
         }
         return res.status(200).json({
-            status: ENUMS.SUCCESS,
+            success: ENUMS.SUCCESS,
             message: 'Reportes encontrados con éxito',
-            isError: false,
+            
             datos: resultados
         });
     }
     catch (error) {
         return res.status(400).json({
-            status: ENUMS.ERROR,
+            success: ENUMS.ERROR,
             message: error.message,
-            isError: true,
             datos: null
         });
     }
@@ -172,6 +196,7 @@ const buscarPorFechas = async (req, res) => {
 module.exports = {
     insertarReporte,
     buscarPorMotivo,
+    buscarPorMotivov2,
     buscarReporte,
     buscarPorFechas,
     eliminarReporteyDetalles

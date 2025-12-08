@@ -1,7 +1,7 @@
 const { config } = require("dotenv");
 config();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 const BANDERA = true;// true para produccion, false para desarrollo
 // const MONGOURI = BANDERA ? process.env.MONGO_URI_PRODUCCION || "mongodb+srv://barbozamujica109:tysonryx123@tottus.tvsqbky.mongodb.net/controlverde?retryWrites=true&w=majority&appName=Tottus" : process.env.MONGO_URI_DESARROLLO || "mongodb://localhost:27017/tottus";
 const MONGOURI = BANDERA ? process.env.MONGO_URI_SOLUCIONES || "mongodb+srv://barbozamujica109:tysonryx123@tottus.tvsqbky.mongodb.net/controlverdePrueba?retryWrites=true&w=majority&appName=Tottus" : process.env.MONGO_URI_DESARROLLO || "mongodb://localhost:27017/tottus";

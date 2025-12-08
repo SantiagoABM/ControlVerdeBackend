@@ -21,6 +21,14 @@ async function buscarReportePorMotivo(motivo) {
     return reportes.map(r => r.tim);
 }
 
+async function buscarReportePorMotivov2(motivo) {
+    if (!motivo) throw new Error('Motivo requerido');
+    const reportes = await Reporte.find(
+        { motivo: motivo, estado: true }
+    );
+    return reportes;
+}
+
 async function buscarReportesAvanzado(filtros) {
     const {
         motivo,
@@ -121,6 +129,7 @@ module.exports = {
     insertarReporte,
     deleteReporte,
     buscarReportePorMotivo,
+    buscarReportePorMotivov2,
     buscarReporte,
     marcarReporteParaExpiracion
 };

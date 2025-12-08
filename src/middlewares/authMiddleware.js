@@ -12,6 +12,21 @@ exports.verificarPassword = async (password, hashedPassword) => {
   return await bcrypt.compare(password, hashedPassword);
 }
 
+exports.obtenerNombreUsuarioDesdeToken = () => {
+  try {
+    const serverToken = activeTokens.get(userId);
+
+    const decoded = jwt.verify(serverToken, SECRET);
+    return decoded.nombre;
+  } catch (err) {
+    return res.status(403).json({
+      success: ENUMS.ERROR,
+      message: "Token inválido",
+      datos: null
+    });
+  }
+}
+
 exports.generarToken = (usuario) => {
   return jwt.sign({ id: usuario._id, rol: usuario.rol }, SECRET, { expiresIn: '2h' });
 }
@@ -36,9 +51,9 @@ exports.verificarToken = (req, res, next) => {
 
     if (!serverToken) {
       return res.status(403).json({
-        status: ENUMS.ERROR,
+        success: ENUMS.ERROR,
         message: "Token inválido",
-        isError: true,
+
         datos: null
       });
     }
@@ -46,9 +61,9 @@ exports.verificarToken = (req, res, next) => {
     // Verificar que el token coincida exactamente
     if (serverToken.token !== token) {
       return res.status(403).json({
-        status: ENUMS.ERROR,
+        success: ENUMS.ERROR,
         message: 'Token inválido: Inicie sesión nuevamente',
-        isError: true,
+        
         datos: null
       });
     }
@@ -57,9 +72,9 @@ exports.verificarToken = (req, res, next) => {
     if (Date.now() > serverToken.expiresAt) {
       activeTokens.delete(userId);
       return res.status(403).json({
-        status: ENUMS.ERROR,
+        success: ENUMS.ERROR,
         message: 'Su sesión ha expirado, por favor inicie sesión nuevamente',
-        isError: true,
+        
         datos: null
       });
     }
@@ -70,9 +85,9 @@ exports.verificarToken = (req, res, next) => {
 
   } catch (err) {
     return res.status(403).json({
-      status: ENUMS.ERROR,
+      success: ENUMS.ERROR,
       message: err.message,
-      isError: true,
+      
       datos: null
     });
   }
