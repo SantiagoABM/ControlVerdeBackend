@@ -4,10 +4,10 @@ const usuarioController = require('../controllers/usuarioController.js');
 const { verificarToken, requiereRol } = require('../middlewares/authMiddleware.js');
 
 
-router.get('/unico/:campo', usuarioController.obtenerListaUnica);
+router.get('/unico/:campo', verificarToken, usuarioController.obtenerListaUnica);
 router.post('/login', usuarioController.login);
-router.post('/crear', verificarToken, requiereRol("administrador", "supervisor"), usuarioController.register);
-router.post('/filtros', usuarioController.buscarUsuarios);
+router.post('/crear',verificarToken,usuarioController.register);
+router.post('/filtros', verificarToken, usuarioController.buscarUsuarios);
 router.post('/update/:id', usuarioController.actualizarUsuario);
 
-module.exports = router; 
+module.exports = router;    

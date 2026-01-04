@@ -5,7 +5,7 @@ const { verificarToken } = require('../middlewares/authMiddleware.js');
 
 
 //api/detallereportes
-router.get('/productos/:tim', detalleReporteController.obtenerDetallesConProducto);
+router.get('/productos/:tim', verificarToken, detalleReporteController.obtenerDetallesConProducto);
 router.get('/skumotivo', verificarToken, detalleReporteController.obtenerDetalleProductosBySkuYMotivo);
 router.post('/add', verificarToken, detalleReporteController.insertarDetalleReporte);
 router.post('/update', verificarToken, detalleReporteController.updateRecibidos);

@@ -16,14 +16,14 @@ const insertarDetalleReporte = async (req, res) => {
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Detalle del reporte insertado con éxito',
-            
+
             datos: resultado
         });
     } catch (error) {
         return res.status(200).json({
             success: ENUMS.ERROR,
             message: error.message,
-            
+
             datos: null
         });
     }
@@ -32,13 +32,13 @@ const insertarDetalleReporte = async (req, res) => {
 
 const insertarLoteReporte = async (req, res) => {
     try {
-        const reportes = req.body;
-
+        const { reportes } = req.body;
+        console.log(req.body)
         if (!Array.isArray(reportes) || reportes.length === 0) {
             return res.status(400).json({
                 success: ENUMS.ERROR,
                 message: 'Se requiere un arreglo de reportes',
-                
+
                 datos: null
             });
         }
@@ -103,7 +103,7 @@ const insertarLoteReporte = async (req, res) => {
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Lote insertado con éxito Productos y Detalles ' + nuevosProductos.length + ' - ' + detalles.length,
-            
+
             datos: null
         });
 
@@ -111,7 +111,7 @@ const insertarLoteReporte = async (req, res) => {
         return res.status(400).json({
             success: ENUMS.ERROR,
             message: error.message,
-            
+
             datos: null
         });
     }
@@ -125,14 +125,14 @@ const obtenerDetallesConProducto = async (req, res) => {
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Detalles obtenidos con éxito',
-            
+
             datos: detalles
         });
     } catch (error) {
         return res.status(400).json({
             success: ENUMS.ERROR,
             message: error.message,
-            
+
             datos: null
         });
     }
@@ -148,7 +148,7 @@ const updateRecibidos = async (req, res) => {
             return res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'No se encontró el reporte con ese ID',
-                
+
                 datos: null
             });
         }
@@ -157,14 +157,14 @@ const updateRecibidos = async (req, res) => {
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Detalle del reporte actualizado con éxito',
-            
+
             datos: result
         });
     } catch (error) {
         return res.status(400).json({
             success: ENUMS.ERROR,
             message: error.message,
-            
+
             datos: null
         });
     }
@@ -180,7 +180,7 @@ const updateDatosDetalle = async (req, res) => {
             res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'No se encontró el reporte con ese ID',
-                
+
                 datos: null
             });
         }
@@ -190,14 +190,14 @@ const updateDatosDetalle = async (req, res) => {
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Detalle del reporte actualizado con éxito',
-            
+
             datos: result
         });
     } catch (error) {
         return res.status(400).json({
             success: ENUMS.ERROR,
             message: error.message,
-            
+
             datos: null
         });
     }
@@ -211,14 +211,14 @@ const obtenerDetalleProducto = async (req, res) => {
         res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Detalles obtenidos con éxito',
-            
+
             datos: detalles
         });
     } catch (error) {
         return res.status(400).json({
             success: ENUMS.ERROR,
             message: error.message,
-            
+
             datos: null
         });
     }
@@ -231,7 +231,7 @@ const actualizarDetallePorSkus = async (req, res) => {
             return res.status(200).json({
                 success: ENUMS.ERROR,
                 message: 'Lista de SKUs vacía o inválida',
-                
+
                 datos: resultado
             });
         }
@@ -241,7 +241,7 @@ const actualizarDetallePorSkus = async (req, res) => {
         res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Detalles del reporte actualizados correctamente.',
-            
+
             datos: resultado
         });
     } catch (error) {
@@ -261,7 +261,7 @@ const obtenerDetalleProductosBySkuYMotivo = async (req, res) => {
             return res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'No se encontraron reportes con ese motivo',
-                
+
                 datos: null
             });
         }
@@ -271,7 +271,7 @@ const obtenerDetalleProductosBySkuYMotivo = async (req, res) => {
             res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'No se encontraron detalles para ese SKU y motivo',
-                
+
                 datos: null
             });
         }
@@ -279,7 +279,7 @@ const obtenerDetalleProductosBySkuYMotivo = async (req, res) => {
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Detalles obtenidos con éxito',
-            
+
             datos: detalles
         });
     } catch (error) {
@@ -301,14 +301,14 @@ const deleteDetalleReporte = async (req, res) => {
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Detalle del reporte eliminado con éxito',
-            
+
             datos: null
         });
     } catch (error) {
         return res.status(400).json({
             success: ENUMS.ERROR,
             message: error.message,
-            
+
             datos: null
         });
     }

@@ -12,20 +12,20 @@ exports.register = async (req, res) => {
                 datos: null
             });
         };
-        const token = await authMiddleware.generarToken(usuario);
-        if (!token) {
-            return res.status(401).json({
-                success: ENUMS.ERROR,
-                message: 'Error al Crea el token.',
-                datos: null
-            });
-        };
+        // const token = await authMiddleware.generarToken(usuario);
+        // if (!token) {
+        //     return res.status(401).json({
+        //         success: ENUMS.ERROR,
+        //         message: 'Error al Crea el token.',
+        //         datos: null
+        //     });
+        // };
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Usuario creado exitosamente.',
 
             datos: {
-                token,
+                // token,
                 nombre: usuario.nombre,
                 rol: usuario.rol
             }
@@ -42,13 +42,14 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { correo, dni, password, admin } = req.body;
-        let usuario;
-
+            let usuario;
+        console.log(req.body)
         // 🔹 1. Login usando correo o DNI
         if (correo != null) {
             usuario = await usuarioService.autenticarUsuario(correo, password);
         } else if (dni != null) {
             usuario = await usuarioService.autenticarUsuarioPorDni(dni, password);
+            console.log(usuario)
         } else {
             return res.status(200).json({
                 success: ENUMS.ERROR,
@@ -65,18 +66,18 @@ exports.login = async (req, res) => {
             });
         }
 
-        // 🔒 2. Validar acceso de administrador → por rol
-        if (admin === true) {
-            console.log("Validando acceso de administrador para:", usuario.correo);
-            if (usuario.rol !== "administrador") {
-                console.log("Acceso denegado: el usuario no tiene rol de administrador.");
-                return res.status(200).json({
-                    success: ENUMS.ERROR,
-                    message: "Acceso denegado: el usuario no tiene rol de administrador.",
-                    datos: null
-                });
-            }
-        }
+        // // 🔒 2. Validar acceso de administrador → por rol
+        // if (admin === true) {
+        //     console.log("Validando acceso de administrador para:", usuario.correo);
+        //     if (usuario.rol !== "administrador" || usuario.rol !== "supervisor") {
+        //         console.log("Acceso denegado: el usuario no tiene rol de administrador.");
+        //         return res.status(200).json({
+        //             success: ENUMS.ERROR,
+        //             message: "Acceso denegado: el usuario no tiene rol de administrador.",
+        //             datos: null
+        //         });
+        //     }
+        // }
 
         // 🔑 3. Generar token
         const token = await authMiddleware.generarToken(usuario);
@@ -95,7 +96,8 @@ exports.login = async (req, res) => {
             datos: {
                 token,
                 nombre: usuario.nombre,
-                rol: usuario.rol
+                rol: usuario.rol,
+                updatePass: usuario.updatePass
             }
         });
 

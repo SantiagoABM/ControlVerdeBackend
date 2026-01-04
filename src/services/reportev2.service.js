@@ -125,9 +125,32 @@ async function buscarReportePorFechas(fechaInicio, fechaFin) {
     return reportes;
 }
 
+async function filtrarReportes(filtros) {
+    const { tim, motivo, estado } = filtros;
+    const query = {};
+    console.log(tim, motivo, estado)
+    // Exact match para numéricos
+    if (tim) {
+        query.$expr = {
+            $regexMatch: {
+                input: { $toString: "$tim" },
+                regex: tim.toString(),
+                options: "i",
+            },
+        };
+    }
+    if (motivo) query.motivo = motivo;
+    if (estado !== undefined) query.estado = estado;
+    console.log('Filtro construido:', query);
+    // Si no se envía nada, devolverá todos (cuidado, puedes limitar si quieres)
+    const reportes = await Reporte.find(query).lean();
+    return reportes;
+}
+
 module.exports = {
     insertarReporte,
     deleteReporte,
+    filtrarReportes,
     buscarReportePorMotivo,
     buscarReportePorMotivov2,
     buscarReporte,

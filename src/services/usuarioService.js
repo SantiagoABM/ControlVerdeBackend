@@ -2,22 +2,33 @@ const Usuario = require('../models/Usuario');
 const authMiddleware = require('../middlewares/authMiddleware.js');
 
 exports.registrarUsuario = async (datos) => {
-    const { correo, password, rol } = datos;
-    const existente = await Usuario.findOne({ correo });
-    if (existente) throw new Error('El correo ya está registrado.');
+    const { dni, rol } = datos;
 
-    const hashedPassword = await authMiddleware.encriptarPassword(password);
+    // 1. Validación
+    const existente = await Usuario.findOne({ dni });
+    if (existente) throw new Error('El DNI ya está registrado.');
+
+    // 2. Generar password temporal (dni sin los últimos 2 dígitos)
+    const generarPassword = (doc) => String(doc).slice(0, -2);
+
+    const passwordPlano = generarPassword(dni);
+
+    // 3. Hashear contraseña
+    const hashedPassword = await authMiddleware.encriptarPassword(passwordPlano);
+
+    // 4. Crear nuevo usuario
     const nuevoUsuario = new Usuario({
         ...datos,
         password: hashedPassword,
-        rol: rol
+        rol
     });
+
     return await nuevoUsuario.save();
 };
 
 
 exports.autenticarUsuario = async ({ correo, password }) => {
-    const usuario = await Usuario.findOne({ correo });
+    const usuario = await Usuario.findOne({ correo, activo: true });
     if (!usuario) throw new Error('Credenciales por correo inválidas.');
 
     const match = await authMiddleware.verificarPassword(password, usuario.password);
@@ -26,7 +37,7 @@ exports.autenticarUsuario = async ({ correo, password }) => {
 };
 
 exports.autenticarUsuarioPorDni = async (dni, password) => {
-    const usuario = await Usuario.findOne({ dni });
+    const usuario = await Usuario.findOne({ dni, activo: true });
     if (!usuario) throw new Error('Credenciales por dni inválidas.');
 
     const match = await authMiddleware.verificarPassword(password, usuario.password);
@@ -36,7 +47,7 @@ exports.autenticarUsuarioPorDni = async (dni, password) => {
 
 exports.autenticarAdmin = async ({ correo, password }) => {
     console.log(correo, password)
-    const usuario = await Usuario.findOne({ correo: correo, esAdmin: true });
+    const usuario = await Usuario.findOne({ correo: correo, esAdmin: true, activo: true });
     if (!usuario) throw new Error('Credenciales de administrador inválidas.');
     const match = await authMiddleware.verificarPassword(password, usuario.password);
     if (!match) throw new Error('Credenciales de administrador inválidas.');

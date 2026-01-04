@@ -5,28 +5,30 @@ const ENUMS = require('../utils/constantes.js');
 const insertarReporte = async (req, res) => {
     try {
         const { tim, creadoPor } = req.body;
+        console.log(creadoPor)
         if (!creadoPor) {
             return res.status(400).json({
                 success: ENUMS.ERROR,
-                message: 'El campo usuario es obligatorio.',
-                
+                message: 'El campo creadoPor es obligatorio.',
+
                 datos: null
             });
         }
         const response = await reporteService.buscarReporte(tim);
+        console.log(req.body);
         if (!response) {
             await reporteService.insertarReporte(req.body);
             res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'Reporte insertado con éxito',
-                
+
                 datos: null
             });
         }
         res.status(200).json({
             success: ENUMS.ERROR,
             message: 'El reporte ya existe',
-            
+
             datos: null
         });
     } catch (error) {
@@ -47,14 +49,14 @@ const buscarPorMotivo = async (req, res) => {
             return res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'No se encontraron reportes con el motivo especificado',
-                
+
                 datos: []
             });
         }
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Reportes encontrados con éxito',
-            
+
             datos: resultados
         });
     } catch (error) {
@@ -75,14 +77,14 @@ const buscarPorMotivov2 = async (req, res) => {
             return res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'No se encontraron reportes con el motivo especificado',
-                
+
                 datos: []
             });
         }
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Reportes encontrados con éxito',
-            
+
             datos: resultados
         });
     } catch (error) {
@@ -105,7 +107,7 @@ const buscarReporte = async (req, res) => {
             return res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'Reporte no se ha encontrado o no existe.',
-                
+
                 datos: null
             });
         }
@@ -113,7 +115,7 @@ const buscarReporte = async (req, res) => {
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Reporte encontrado con éxito',
-            
+
             datos: reporte
         });
     } catch (error) {
@@ -137,7 +139,7 @@ const eliminarReporteyDetalles = async (req, res) => {
         res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Reporte y detalles serán eliminados en 2 días',
-            
+
             datos: null
         });
     } catch (error) {
@@ -157,14 +159,14 @@ const buscarPorFechas = async (req, res) => {
             return res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'No se encontraron reportes en el rango de fechas especificado',
-                
+
                 datos: []
             });
         }
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Reportes encontrados con éxito',
-            
+
             datos: resultados
         });
     }
@@ -176,6 +178,27 @@ const buscarPorFechas = async (req, res) => {
         });
     }
 };
+
+const buscarReportesPorFiltros = async (req, res) => {
+    try {
+        const filtros = req.body;
+        console.log(req.body)
+        const reportes = await reporteService.filtrarReportes(filtros);
+
+        return res.status(200).json({
+            success: ENUMS.SUCCESS,
+            message: "Reportes obtenidos",
+            datos: reportes
+        });
+
+    } catch (error) {
+        return res.status(400).json({
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null
+        });
+    }
+}
 
 // const eliminarReporteyDetalles = async (req, res) => {
 //     const { tim } = req.params;
@@ -199,5 +222,6 @@ module.exports = {
     buscarPorMotivov2,
     buscarReporte,
     buscarPorFechas,
-    eliminarReporteyDetalles
+    eliminarReporteyDetalles,
+    buscarReportesPorFiltros
 };

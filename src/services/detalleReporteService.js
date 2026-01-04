@@ -11,7 +11,7 @@ async function insertarDetalleReporteEnLote(detalleReportes) {
 async function updateRecibidos(id, unidadesRecibidas, idUsuario) {
     return DetalleReporte.findByIdAndUpdate(
         id,
-        {$set :{ uRecibidas: unidadesRecibidas, usuario: idUsuario }}, // Asegúrate de que 'usuario' esté definido en el contexto
+        { $set: { uRecibidas: unidadesRecibidas, usuario: idUsuario } }, // Asegúrate de que 'usuario' esté definido en el contexto
         { new: true } // devuelve el documento actualizado
     );
 }
@@ -19,7 +19,7 @@ async function updateRecibidos(id, unidadesRecibidas, idUsuario) {
 async function updateDatos(id, uRecibidas, fechavencimiento, idUsuario) {
     return DetalleReporte.findByIdAndUpdate(
         id,
-        {$set:{ uRecibidas, fechavencimiento , usuario: idUsuario}},
+        { $set: { uRecibidas, fechavencimiento, usuario: idUsuario } },
         { new: true } // devuelve el documento actualizado
     );
 }
@@ -66,7 +66,9 @@ const obtenerDetallesConProductoService = async (tim) => {
                 fechavencimiento: 1,
                 observacion: 1,
                 marcaSensible: { $ifNull: ['$productoInfo.marcaSensible', false] },
-                fastRegister: 1
+                isContable: { $ifNull: ['$productoInfo.isContable', false] },
+                fastRegister: 1,
+                modificadoPor: 1
             }
         }
     ]);
@@ -132,11 +134,13 @@ const obtenerDetalleProductoServiceBySkuYTims = async (sku, tims) => {
 
 const obtenerDetalleProductoServiceBySku = async (sku, tim) => {
     const resultados = await DetalleReporte.aggregate([
-        { $match: { sku: String(sku),
-            tim: Number(tim)
-         }
-        
-    },
+        {
+            $match: {
+                sku: String(sku),
+                tim: Number(tim)
+            }
+
+        },
         {
             $lookup: {
                 from: 'productos',
@@ -175,7 +179,9 @@ const obtenerDetalleProductoServiceBySku = async (sku, tim) => {
                 uRecibidas: 1,
                 fechavencimiento: 1,
                 observacion: 1,
-                fastRegister: 1
+                fastRegister: 1,
+                marcaSensible: { $ifNull: ['$productoInfo.marcaSensible', false] },
+                isContable: { $ifNull: ['$productoInfo.isContable', false] }
             }
         }
     ]);
@@ -192,7 +198,7 @@ async function deleteDetalleRep(id) {
 }
 
 async function deleteDetallesReporte(tim) {
-    return await DetalleReporte.deleteMany({ tim:tim });
+    return await DetalleReporte.deleteMany({ tim: tim });
 }
 
 module.exports = {

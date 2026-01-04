@@ -69,7 +69,7 @@ exports.verificarToken = (req, res, next) => {
     }
 
     // Verificar expiración manual del servidor
-    if (Date.now() > serverToken.expiresAt) {
+    if (Date.now() > serverToken.sAt) {
       activeTokens.delete(userId);
       return res.status(403).json({
         success: ENUMS.ERROR,

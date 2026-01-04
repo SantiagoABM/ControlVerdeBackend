@@ -66,7 +66,10 @@ const obtenerListaUnica = async (req, res) => {
 const obtenerProductosPorSubdptos = async (req, res) => {
     try {
         const subdptos = [
-            "J030101", "J030102", "J030104", "J030105", "J030106", "J030107", "J030201", "J030202", "J040101", "J040102", "J050101", "J050205", "J050301", "J050201", "J050306", "J050204", "J050202", "J050102", "J050302", "J060101", "J060102", "J060201", "J060202", "J070101", "J070102", "J070103", "J070107", "J070109"
+            "J030101", "J030102", "J030104", "J030105", "J030106", "J030107", "J030201", "J030202",
+            "J040101", "J040102", "J050101", "J050205", "J050301", "J050201", "J050306", "J050204",
+            "J050202", "J050102", "J050302", "J060101", "J060102", "J060201", "J060202", "J070101",
+            "J070102", "J070103", "J070107", "J070109"
         ];
         if (!Array.isArray(subdptos) || subdptos.length === 0) {
             res.status(200).json({
@@ -158,7 +161,7 @@ const buscarProductosFiltrados = async (req, res) => {
             ean,
             sku,
             subdpto,
-            precio,
+            costoPromedio,
             casePack,
             descripcion,
             proveedor,
@@ -169,7 +172,7 @@ const buscarProductosFiltrados = async (req, res) => {
             ean,
             sku,
             subdpto,
-            precio,
+            costoPromedio,
             casePack,
             descripcion,
             proveedor,
@@ -196,14 +199,14 @@ const buscarProductosFiltrados = async (req, res) => {
 
 const updateDatosProducto = async (req, res) => {
     try {
-        const { sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, socketId, subdpto, descripcion, marcaSensible } = req.body
-        const result = await productoService.updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, subdpto, descripcion, marcaSensible);
+        const { sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, socketId, subdpto, descripcion, marcaSensible, isContable } = req.body
+        console.log(isContable)
+        const result = await productoService.updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, subdpto, descripcion, marcaSensible, isContable);
 
         if (!result) {
             res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'No se encontró el reporte con ese ID',
-
                 datos: null
             });
         }
@@ -216,7 +219,6 @@ const updateDatosProducto = async (req, res) => {
         res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Se actualizó el producto correctamente',
-
             datos: result
         });
     } catch (error) {
@@ -228,6 +230,7 @@ const updateDatosProducto = async (req, res) => {
         });
     }
 }
+
 const actualizarDetallePorSkus = async (req, res) => {
     try {
         const { skus } = req.body;
@@ -257,6 +260,7 @@ const actualizarDetallePorSkus = async (req, res) => {
         });
     }
 };
+
 const getProductosBySkus = async (req, res) => {
     const { skus } = req.body;
 
@@ -286,30 +290,114 @@ const getProductosBySkus = async (req, res) => {
 };
 
 const eliminarProducto = async (req, res) => {
-  try {
-    const { id } = req.params;
+    try {
+        const { id } = req.params;
 
-    const deleted = await productoService.eliminarProducto(id);
+        const deleted = await productoService.eliminarProducto(id);
 
-    if (!deleted) {
-      return res.status(404).json({
-        success: false,
-        message: "Producto no encontrado",
-      });
+        if (!deleted) {
+            return res.status(404).json({
+                success: false,
+                message: "Producto no encontrado",
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: "Producto eliminado correctamente",
+        });
+    } catch (error) {
+        console.error("Error eliminando producto:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Error interno del servidor",
+        });
     }
-
-    return res.json({
-      success: true,
-      message: "Producto eliminado correctamente",
-    });
-  } catch (error) {
-    console.error("Error eliminando producto:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error interno del servidor",
-    });
-  }
 };
+
+const actualizarFlagsPorSubdpto = async (req, res) => {
+    try {
+        const { subdptos } = req.body;
+
+        // 🧪 Validación
+        if (!Array.isArray(subdptos) || subdptos.length === 0) {
+            return res.status(400).json({
+                success: ENUMS.ERROR,
+                message: 'Lista de subdepartamentos requerida',
+                datos: null
+            });
+        }
+
+        const result = await productoService.actualizarFlagsPorSubdpto(subdptos);
+
+        res.json({
+            success: ENUMS.SUCCESS,
+            message: `Flags actualizados correctamente (${result.modifiedCount} registros)`,
+            datos: result
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: ENUMS.ERROR,
+            message: 'Error al actualizar flags',
+            datos: null
+        });
+    }
+};
+
+const listarSubdptosConFlags = async (req, res) => {
+    try {
+        const data = await productoService.listarSubdptosConFlags();
+
+        res.json({
+            success: ENUMS.SUCCESS,
+            message: 'Flags obtenidos correctamente',
+            datos: data
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: ENUMS.ERROR,
+            message: "Error al listar subdepartamentos",
+            datos: null
+        });
+    }
+};
+
+const importarSkusController = async (req, res) => {
+    try {
+        const { skus } = req.body;
+
+        if (!Array.isArray(skus) || skus.length === 0) {
+            return res.status(400).json({
+                success: ENUMS.ERROR,
+                message: "Lista de SKUs inválida",
+                datos: null
+            });
+        }
+
+        const result = await productoService.importarSkus(skus);
+
+        const { enviados, actualizados, noEncontrados } = result;
+
+        const mensaje =
+            noEncontrados.length > 0
+                ? `Se actualizaron ${actualizados} de ${enviados} SKUs. Algunos no fueron encontrados.`
+                : `Se actualizaron correctamente ${actualizados} SKUs.`;
+
+        return res.json({
+            success: ENUMS.SUCCESS,
+            message: mensaje,
+            datos: noEncontrados, // 👈 SOLO LOS NO ENCONTRADOS
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null        });
+    }
+}
 
 module.exports = {
     obtenerListaUnica,
@@ -321,5 +409,8 @@ module.exports = {
     actualizarDetallePorSkus,
     obtenerProductosPorSubdptos,
     buscarProductosFiltrados,
-    eliminarProducto
+    eliminarProducto,
+    actualizarFlagsPorSubdpto,
+    listarSubdptosConFlags,
+    importarSkusController
 };
