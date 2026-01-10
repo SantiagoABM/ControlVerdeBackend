@@ -11,6 +11,6 @@ router.post('/add', verificarToken, detalleReporteController.insertarDetalleRepo
 router.post('/update', verificarToken, detalleReporteController.updateRecibidos);
 router.post('/updatedr', verificarToken, detalleReporteController.updateDatosDetalle);
 router.post('/lote', verificarToken, detalleReporteController.insertarLoteReporte);
-router.get('/delete/:id', verificarToken, detalleReporteController.deleteDetalleReporte);
+router.post('/delete/:id', verificarToken, detalleReporteController.deleteDetalleReporte);
 
 module.exports = router;
