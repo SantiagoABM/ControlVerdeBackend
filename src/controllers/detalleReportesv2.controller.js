@@ -6,7 +6,7 @@ const ENUMS = require('../utils/constantes.js');
 
 const insertarDetalleReporte = async (req, res) => {
     try {
-        const { socketId, detalleReporte, salaId, usuario } = req.body; // <- salaId enviado desde frontend
+        const { socketId, detalleReporte, salaId } = req.body; // <- salaId enviado desde frontend
         const result = await detalleReporteService.insertarDetalleReporte(detalleReporte);
         const resultado = await detalleReporteService.obtenerDetalleProductoServiceBySku(result.sku, result.tim);
 
@@ -55,7 +55,7 @@ const insertarLoteReporte = async (req, res) => {
                 sku, ean, subdpto, descripcion, casePack,
                 costoPromedio, precioVigente, uMedida,
                 tim, olpn, uEnviadas, uRecibidas,
-                fechavencimiento, observacion, fastRegister
+                fechavencimiento, observacion,modificadoPor, fastRegister
             } = r;
 
             // Crear nuevo producto si no existe
@@ -84,6 +84,7 @@ const insertarLoteReporte = async (req, res) => {
                 uRecibidas,
                 fechavencimiento: fechavencimiento ?? '',
                 observacion: observacion ?? 'PERTENECE',
+                modificadoPor: modificadoPor ?? '',
                 fastRegister: fastRegister ?? false,
             });
         }
@@ -140,9 +141,8 @@ const obtenerDetallesConProducto = async (req, res) => {
 
 const updateRecibidos = async (req, res) => {
     try {
-        const usuario = req.usuario._id; // Obtener el ID del usuario autenticado
-        const { id, uRecibidas, socketId, salaId } = req.body
-        const result = await detalleReporteService.updateRecibidos(id, uRecibidas, usuario)
+        const { id, uRecibidas, socketId,modificadoPor, salaId } = req.body
+        const result = await detalleReporteService.updateRecibidos(id, uRecibidas,modificadoPor)
 
         if (!result) {
             return res.status(200).json({
@@ -172,9 +172,8 @@ const updateRecibidos = async (req, res) => {
 
 const updateDatosDetalle = async (req, res) => {
     try {
-        const usuario = req.usuario._id; // Obtener el ID del usuario autenticado
-        const { id, uRecibidas, fechavencimiento, socketId, salaId } = req.body
-        const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento, usuario);
+        const { id, uRecibidas, fechavencimiento, socketId,modificadoPor, salaId } = req.body
+        const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento, modificadoPor);
 
         if (!result) {
             res.status(200).json({
