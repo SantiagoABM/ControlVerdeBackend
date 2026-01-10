@@ -95,7 +95,7 @@ exports.login = async (req, res) => {
             message: admin ? "Inicio de sesión administrador exitoso." : "Inicio de sesión exitoso.",
             datos: {
                 token,
-                nombre: usuario.nombre,
+                nombre: usuario.nombre + " " + usuario.apellido,
                 rol: usuario.rol,
                 updatePass: usuario.updatePass
             }
