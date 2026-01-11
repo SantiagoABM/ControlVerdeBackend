@@ -17,6 +17,7 @@ const insertarReporte = async (req, res) => {
         }
         const response = await reporteService.buscarReporte(req.body);
         console.log(req.body);
+        console.log(response);
         if (!response) {
             await reporteService.insertarReporte(req.body);
             res.status(200).json({
@@ -29,7 +30,6 @@ const insertarReporte = async (req, res) => {
         res.status(200).json({
             success: ENUMS.ERROR,
             message: 'El reporte ya existe',
-
             datos: null
         });
     } catch (error) {
