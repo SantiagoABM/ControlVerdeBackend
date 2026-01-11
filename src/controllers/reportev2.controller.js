@@ -4,8 +4,9 @@ const ENUMS = require('../utils/constantes.js');
 
 const insertarReporte = async (req, res) => {
     try {
-        const { tim, creadoPor } = req.body;
-        console.log(creadoPor)
+        const { creadoPor } = req.body;
+
+        console.log(req.body)
         if (!creadoPor) {
             return res.status(400).json({
                 success: ENUMS.ERROR,
@@ -14,7 +15,7 @@ const insertarReporte = async (req, res) => {
                 datos: null
             });
         }
-        const response = await reporteService.buscarReporte(tim);
+        const response = await reporteService.buscarReporte(req.body);
         console.log(req.body);
         if (!response) {
             await reporteService.insertarReporte(req.body);
