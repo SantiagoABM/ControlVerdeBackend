@@ -8,6 +8,6 @@ router.get('/unico/:campo', verificarToken, usuarioController.obtenerListaUnica)
 router.post('/login', usuarioController.login);
 router.post('/crear',verificarToken,usuarioController.register);
 router.post('/filtros', verificarToken, usuarioController.buscarUsuarios);
-router.post('/update/:id', usuarioController.actualizarUsuario);
+router.post('/update/:id', verificarToken,usuarioController.actualizarUsuario);
 
 module.exports = router;    

@@ -9,8 +9,8 @@ const reporteSchema = new mongoose.Schema({
     placa: String,
     origen: String,
     destino: String,
-    fechaEnvio: Date,
-    fechaLlegada: Date,
+    fechaEnvio: String,
+    fechaLlegada: String,
     creadoPor: String,
     estado: {
         type: Boolean,
