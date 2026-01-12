@@ -71,7 +71,7 @@ async function filtrarProductos({
     return productos;
 }
 
-async function importarSkus(skus) {
+async function importarSkus(skus, marcaSensible, isContable) {
   const skusLimpios = skus
     .map(s => String(s).trim())
     .filter(Boolean);
@@ -99,8 +99,8 @@ async function importarSkus(skus) {
       { sku: { $in: skusEncontrados } },
       {
         $set: {
-          isContable: true,
-          marcaSensible: true,
+          isContable: isContable,
+          marcaSensible: marcaSensible,
         },
       }
     );

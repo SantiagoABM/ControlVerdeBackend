@@ -366,7 +366,7 @@ const listarSubdptosConFlags = async (req, res) => {
 
 const importarSkusController = async (req, res) => {
     try {
-        const { skus } = req.body;
+        const { skus, marcaSensible, isContable } = req.body;
 
         if (!Array.isArray(skus) || skus.length === 0) {
             return res.status(400).json({
@@ -376,7 +376,7 @@ const importarSkusController = async (req, res) => {
             });
         }
 
-        const result = await productoService.importarSkus(skus);
+        const result = await productoService.importarSkus(skus, marcaSensible, isContable);
 
         const { enviados, actualizados, noEncontrados } = result;
 
