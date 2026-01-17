@@ -133,7 +133,7 @@ const buscarProducto = async (req, res) => {
 
         if (!producto) {
             return res.status(200).json({
-                success: ENUMS.SUCCESS,
+                success: ENUMS.ERROR,
                 message: 'Producto no encontrado',
 
                 datos: null
