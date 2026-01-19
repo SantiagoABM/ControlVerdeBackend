@@ -23,7 +23,7 @@ router.post('/productos/detalle',
     verificarToken,
     productoController.actualizarDetallePorSkus
 );
-router.post('/por-subdptos',
+router.get('/por-subdptos',
     verificarToken,
     productoController.obtenerProductosPorSubdptos
 );
