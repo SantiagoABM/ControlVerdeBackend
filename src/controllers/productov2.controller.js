@@ -81,8 +81,7 @@ const obtenerProductosPorSubdptos = async (req, res) => {
         const productos = await productoService.buscarProductoPorSubdpto(subdptos);
         res.status(200).json({
             success: ENUMS.SUCCESS,
-            message: 'No se ha podido crear el usuario.',
-
+            message: 'Se encontraron los siguientes productos.',
             datos: productos,
             total: productos.length
         });

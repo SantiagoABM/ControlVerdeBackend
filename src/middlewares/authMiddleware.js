@@ -28,7 +28,7 @@ exports.obtenerNombreUsuarioDesdeToken = () => {
 }
 
 exports.generarToken = (usuario) => {
-  return jwt.sign({ id: usuario._id, rol: usuario.rol }, SECRET, { expiresIn: '2h' });
+  return jwt.sign({ id: usuario._id, rol: usuario.rol }, SECRET, { expiresIn: '24h' });
 }
 
 exports.verificarToken = (req, res, next) => {

@@ -24,7 +24,7 @@ router.post('/productos/detalle',
     productoController.actualizarDetallePorSkus
 );
 router.get('/por-subdptos',
-    verificarToken,
+    // verificarToken,
     productoController.obtenerProductosPorSubdptos
 );
 router.post('/add',
