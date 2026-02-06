@@ -8,7 +8,7 @@ router.get('/logs',
     verificarToken,
     bitacoraController.obtenerLogsByFilter);
 router.get('/limpiar', 
-    // verificarToken,
+    verificarToken,
     bitacoraController.limpiarBitacora);
 
 module.exports = router;
