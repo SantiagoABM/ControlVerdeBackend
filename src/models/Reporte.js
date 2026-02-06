@@ -11,7 +11,7 @@ const reporteSchema = new mongoose.Schema({
     destino: String,
     fechaEnvio: String,
     fechaLlegada: String,
-    creadoPor: String,
+    creadoPor: String,  
     estado: {
         type: Boolean,
         default: true

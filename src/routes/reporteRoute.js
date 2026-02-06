@@ -10,5 +10,6 @@ router.get('/reporte/:tim', verificarToken, reporteController.buscarReporte);
 router.post('/add', verificarToken, reporteController.insertarReporte);
 router.post('/filtros', verificarToken, reporteController.buscarReportesPorFiltros);
 router.get('/deleterdr/:tim', verificarToken, reporteController.eliminarReporteyDetalles);
+router.get('/reactivar/:tim', verificarToken, reporteController.reactivarTim);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const reporteService = require('../services/reportev2.service.js');
 const detalleReporteService = require('../services/detalleReporteService.js');
+const crearBitacoraAuditoria = require('../middlewares/bitacoraMiddleware.js');
 const ENUMS = require('../utils/constantes.js');
 
 const insertarReporte = async (req, res) => {
@@ -16,12 +17,17 @@ const insertarReporte = async (req, res) => {
             });
         }
         const response = await reporteService.buscarReporte(tim);
+
         if (!response) {
             await reporteService.insertarReporte(req.body);
+            await crearBitacoraAuditoria({
+                dni: req.usuario.dni,
+                tipo: "REPORTES",
+                mensaje: `Usuario ${req.usuario.nombres} insertó el reporte con TIM ${tim}.`
+            });
             res.status(200).json({
                 success: ENUMS.SUCCESS,
                 message: 'Reporte insertado con éxito',
-
                 datos: null
             });
         }
@@ -134,10 +140,41 @@ const eliminarReporteyDetalles = async (req, res) => {
 
         await detalleReporteService.marcarDetallesParaExpiracion(tim, fechaExpiracion);
         await reporteService.marcarReporteParaExpiracion(tim, fechaExpiracion);
-
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "REPORTES",
+            mensaje: `Usuario ${req.usuario.nombres} eliminó el reporte con TIM ${tim}.`
+        });
         res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Reporte y detalles serán eliminados en 2 días',
+
+            datos: null
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null
+        });
+    }
+};
+
+const reactivarTim = async (req, res) => {
+    const { tim } = req.params;
+
+    try {
+
+        await detalleReporteService.desMarcarDetallesParaExpiracion(tim);
+        await reporteService.desMarcarReporteParaExpiracion(tim);
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "REPORTES",
+            mensaje: `Usuario ${req.usuario.nombres} reactivó el reporte con TIM ${tim}.`
+        });
+        res.status(200).json({
+            success: ENUMS.SUCCESS,
+            message: 'Reporte y detalles activados correctamente',
 
             datos: null
         });
@@ -222,5 +259,6 @@ module.exports = {
     buscarReporte,
     buscarPorFechas,
     eliminarReporteyDetalles,
-    buscarReportesPorFiltros
+    buscarReportesPorFiltros,
+    reactivarTim
 };

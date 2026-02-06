@@ -105,6 +105,10 @@ async function marcarReporteParaExpiracion(tim, fecha) {
     return await Reporte.updateOne({ tim }, { $set: { expireAt: fecha, estado: false } });
 }
 
+async function desMarcarReporteParaExpiracion(tim) {
+    return await Reporte.updateOne({ tim }, { $set: { expireAt: null, estado: true } });
+}
+
 async function buscarReporte(reporte) {
     if (!reporte) throw new Error('Código Tim requerido');
     const report = await Reporte.findOne(
@@ -154,5 +158,6 @@ module.exports = {
     buscarReportePorMotivo,
     buscarReportePorMotivov2,
     buscarReporte,
-    marcarReporteParaExpiracion
+    marcarReporteParaExpiracion,
+    desMarcarReporteParaExpiracion
 };

@@ -16,6 +16,7 @@ const productoSchema = new mongoose.Schema({
   precioVigente: { type: Number, default: 0 },
   uMedida: { type: String, default: '' },
   isContable:{type: Boolean, default: false},
+  precioInv: { type: Number, default: 0 },
   detalle: String,
   marcaSensible: {type: Boolean, default: false}
 }, {

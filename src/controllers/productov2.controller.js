@@ -1,10 +1,12 @@
 const productoService = require('../services/productoService.js');
+const crearBitacoraAuditoria = require('../middlewares/bitacoraMiddleware.js');
 const ENUMS = require('../utils/constantes.js');
 
 
 const insertarProducto = async (req, res) => {
     try {
         const producto = await productoService.insertarProducto(req.body);
+        console.log(req.usuario)
         if (!producto) {
             res.status(200).json({
                 success: ENUMS.ERROR,
@@ -12,6 +14,11 @@ const insertarProducto = async (req, res) => {
                 datos: null
             });
         }
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "PRODUCTOS",
+            mensaje: `Usuario ${req.usuario.nombres} insertó el producto con sku ${req.body.sku}.`
+        });
         res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Se guardó el producto exitosamente.',
@@ -97,32 +104,41 @@ const obtenerProductosPorSubdptos = async (req, res) => {
 const insertarLote = async (req, res) => {
     try {
         const productos = req.body;
-        if (!productos || !Array.isArray(productos) || productos.length === 0) {
-            res.status(200).json({
+
+        if (!Array.isArray(productos) || productos.length === 0) {
+            return res.status(400).json({
                 success: ENUMS.ERROR,
                 message: 'Se esperaba un arreglo de productos',
-
                 datos: null
             });
         }
 
-        const insertados = await productoService.insertarProductosEnLote(productos);
+        const resultado = await productoService.insertarProductosEnLote(productos);
+
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "PRODUCTOS",
+            mensaje: `Usuario ${req.usuario.nombres} cargó/actualizó la profundidad por lotes.`
+        });
+
         res.status(200).json({
             success: ENUMS.SUCCESS,
-            message: 'Lote insertado',
-
-            datos: null,
-            total: insertados.length
+            message: 'Productos insertados / actualizados correctamente',
+            datos: {
+                insertados: resultado.upsertedCount,
+                actualizados: resultado.modifiedCount
+            }
         });
+
     } catch (error) {
         res.status(400).json({
             success: ENUMS.ERROR,
             message: error.message,
-
             datos: null
         });
     }
 };
+
 
 const buscarProducto = async (req, res) => {
     const { codigo } = req.params;
@@ -300,7 +316,11 @@ const eliminarProducto = async (req, res) => {
                 message: "Producto no encontrado",
             });
         }
-
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "PRODUCTOS",
+            mensaje: `Usuario ${req.usuario.nombres} eliminó el producto con sku ${id}.`
+        });
         return res.json({
             success: true,
             message: "Producto eliminado correctamente",
@@ -328,7 +348,14 @@ const actualizarFlagsPorSubdpto = async (req, res) => {
         }
 
         const result = await productoService.actualizarFlagsPorSubdpto(subdptos);
+        const listaSubdptos = subdptos.join(", ");
 
+        // 🔹 Bitácora
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "PRODUCTOS",
+            mensaje: `Usuario ${req.usuario.nombres} actualizó a MS ${subdptos.length} subdepartamentos : ${listaSubdptos}).`
+        });
         res.json({
             success: ENUMS.SUCCESS,
             message: `Flags actualizados correctamente (${result.modifiedCount} registros)`,
@@ -383,7 +410,11 @@ const importarSkusController = async (req, res) => {
             noEncontrados.length > 0
                 ? `Se actualizaron ${actualizados} de ${enviados} SKUs. Algunos no fueron encontrados.`
                 : `Se actualizaron correctamente ${actualizados} SKUs.`;
-
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "PRODUCTOS",
+            mensaje: `Usuario ${req.usuario.nombres} actualizó ${actualizados} de ${enviados} SKUs. No encontrados: ${noEncontrados.join(", ")}.`
+        });
         return res.json({
             success: ENUMS.SUCCESS,
             message: mensaje,
@@ -394,7 +425,8 @@ const importarSkusController = async (req, res) => {
         return res.status(500).json({
             success: ENUMS.ERROR,
             message: error.message,
-            datos: null        });
+            datos: null
+        });
     }
 }
 

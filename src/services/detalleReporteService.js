@@ -193,6 +193,10 @@ async function marcarDetallesParaExpiracion(tim, fecha) {
     return await DetalleReporte.updateMany({ tim }, { $set: { expireAt: fecha } });
 }
 
+async function desMarcarDetallesParaExpiracion(tim) {
+    return await DetalleReporte.updateMany({ tim }, { $set: { expireAt: null } });
+}
+
 async function deleteDetalleRep(id) {
     await DetalleReporte.findByIdAndDelete(id);
 }
@@ -211,5 +215,6 @@ module.exports = {
     obtenerDetallesConProductoService,
     obtenerDetalleProductoServiceBySku,
     obtenerDetalleProductoServiceBySkuYTims,
-    marcarDetallesParaExpiracion
+    marcarDetallesParaExpiracion,
+    desMarcarDetallesParaExpiracion
 };

@@ -1,9 +1,11 @@
 const usuarioService = require('../services/usuarioService');
+const crearBitacoraAuditoria = require('../middlewares/bitacoraMiddleware');
 const authMiddleware = require('../middlewares/authMiddleware');
 const ENUMS = require('../utils/constantes');
 
 exports.register = async (req, res) => {
     try {
+        const user = req.usuario;
         const usuario = await usuarioService.registrarUsuario(req.body);
         if (!usuario) {
             return res.status(400).json({
@@ -20,6 +22,11 @@ exports.register = async (req, res) => {
         //         datos: null
         //     });
         // };
+        await crearBitacoraAuditoria({
+            dni: user.dni,
+            tipo: "USUARIOS",
+            mensaje: `Usuario ${user.nombres} registró un nuevo usuario ${req.body.nombre} ${req.body.apellido}.`
+        });
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Usuario creado exitosamente.',
@@ -42,7 +49,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { correo, dni, password, admin } = req.body;
-            let usuario;
+        let usuario;
         console.log(req.body)
         // 🔹 1. Login usando correo o DNI
         if (correo != null) {
@@ -90,6 +97,11 @@ exports.login = async (req, res) => {
 
         console.log("Exito login usuario:", usuario.nombre);
         // 🚀 5. Respuesta final
+        await crearBitacoraAuditoria({
+            dni: usuario.dni,
+            tipo: "AUTH",
+            mensaje: `Usuario ${usuario.nombre} ${usuario.apellido} inició sesión.`
+        });
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: admin ? "Inicio de sesión administrador exitoso." : "Inicio de sesión exitoso.",
@@ -133,6 +145,7 @@ exports.buscarUsuarios = async (req, res) => {
 
 exports.actualizarUsuario = async (req, res) => {
     try {
+        const usuario = req.usuario;
         const { id } = req.params;
         const data = req.body;
 
@@ -145,7 +158,11 @@ exports.actualizarUsuario = async (req, res) => {
                 datos: null
             });
         }
-
+        await crearBitacoraAuditoria({
+            dni: usuario.dni,
+            tipo: "USUARIOS",
+            mensaje: `Usuario ${usuario.nombre} ${usuario.apellido} cambió datos del usuario ${usuarioActualizado.nombre} ${usuarioActualizado.apellido}.`
+        });
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: "Usuario actualizado correctamente",

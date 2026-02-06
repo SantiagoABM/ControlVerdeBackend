@@ -72,47 +72,47 @@ async function filtrarProductos({
 }
 
 async function importarSkus(skus, marcaSensible, isContable) {
-  const skusLimpios = skus
-    .map(s => String(s).trim())
-    .filter(Boolean);
+    const skusLimpios = skus
+        .map(s => String(s).trim())
+        .filter(Boolean);
 
-  if (skusLimpios.length === 0) {
-    throw new Error("No hay SKUs válidos");
-  }
+    if (skusLimpios.length === 0) {
+        throw new Error("No hay SKUs válidos");
+    }
 
-  // 🔍 Buscar existentes
-  const productos = await Producto.find(
-    { sku: { $in: skusLimpios } },
-    { sku: 1, _id: 0 }
-  );
-
-  const skusEncontrados = productos.map(p => p.sku);
-
-  const skusNoEncontrados = skusLimpios.filter(
-    sku => !skusEncontrados.includes(sku)
-  );
-
-  let actualizados = 0;
-
-  if (skusEncontrados.length > 0) {
-    const result = await Producto.updateMany(
-      { sku: { $in: skusEncontrados } },
-      {
-        $set: {
-          isContable: isContable,
-          marcaSensible: marcaSensible,
-        },
-      }
+    // 🔍 Buscar existentes
+    const productos = await Producto.find(
+        { sku: { $in: skusLimpios } },
+        { sku: 1, _id: 0 }
     );
 
-    actualizados = result.modifiedCount;
-  }
+    const skusEncontrados = productos.map(p => p.sku);
 
-  return {
-    enviados: skusLimpios.length,
-    actualizados,
-    noEncontrados: skusNoEncontrados,
-  };
+    const skusNoEncontrados = skusLimpios.filter(
+        sku => !skusEncontrados.includes(sku)
+    );
+
+    let actualizados = 0;
+
+    if (skusEncontrados.length > 0) {
+        const result = await Producto.updateMany(
+            { sku: { $in: skusEncontrados } },
+            {
+                $set: {
+                    isContable: isContable,
+                    marcaSensible: marcaSensible,
+                },
+            }
+        );
+
+        actualizados = result.modifiedCount;
+    }
+
+    return {
+        enviados: skusLimpios.length,
+        actualizados,
+        noEncontrados: skusNoEncontrados,
+    };
 }
 
 // async function buscarProductoPorCodigo(codigo) {
@@ -135,8 +135,24 @@ async function importarSkus(skus, marcaSensible, isContable) {
 // }
 
 async function insertarProductosEnLote(productos) {
-    return await Producto.insertMany(productos, { ordered: false });
+    const operaciones = productos.map(prod => ({
+        updateOne: {
+            filter: { sku: prod.sku }, // 👈 o ean, o el identificador único
+            update: {
+                $set: {
+                    ...prod,
+                    updatedAt: new Date()
+                }
+            },
+            upsert: true
+        }
+    }));
+
+    const resultado = await Producto.bulkWrite(operaciones, { ordered: false });
+
+    return resultado;
 }
+
 
 const getProductosBySkus = async (skus) => {
     return await Producto.find(

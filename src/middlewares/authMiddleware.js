@@ -28,7 +28,7 @@ exports.obtenerNombreUsuarioDesdeToken = () => {
 }
 
 exports.generarToken = (usuario) => {
-  return jwt.sign({ id: usuario._id, rol: usuario.rol }, SECRET, { expiresIn: '24h' });
+  return jwt.sign({ id: usuario._id, dni: usuario.dni, nombres: usuario.nombre + " " + usuario.apellido, rol: usuario.rol }, SECRET, { expiresIn: '24h' });
 }
 
 exports.verificarToken = (req, res, next) => {
@@ -63,7 +63,7 @@ exports.verificarToken = (req, res, next) => {
       return res.status(403).json({
         success: ENUMS.ERROR,
         message: 'Token inválido: Inicie sesión nuevamente',
-        
+
         datos: null
       });
     }
@@ -74,7 +74,7 @@ exports.verificarToken = (req, res, next) => {
       return res.status(403).json({
         success: ENUMS.ERROR,
         message: 'Su sesión ha expirado, por favor inicie sesión nuevamente',
-        
+
         datos: null
       });
     }
@@ -87,7 +87,7 @@ exports.verificarToken = (req, res, next) => {
     return res.status(403).json({
       success: ENUMS.ERROR,
       message: err.message,
-      
+
       datos: null
     });
   }

@@ -9,6 +9,7 @@ router.get('/unico/:campo',
     productoController.obtenerListaUnica
 );
 router.get('/buscar/:codigo',
+    verificarToken,
     productoController.buscarProducto
 );
 router.get("/subdptos/flags",

@@ -14,6 +14,8 @@ const usuarioRoute = require('./routes/usuarioRoute');
 const productoRoute = require("./routes/productoRoute.js");
 const reporteRoute = require("./routes/reporteRoute.js");
 const detalleReporteRoute = require("./routes/detalleReporteRoute.js");
+const bitacoraRoute = require("./routes/bitacoraRoute.js");
+const emailRoute = require("./routes/emailRoute.js");
 
 
 const app = express();
@@ -50,7 +52,7 @@ app.set("json spaces", 4);
 
 //middlewares
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(cors());
@@ -65,6 +67,8 @@ app.use((req, res, next) => {
 });
 
 app.use('/api', testRoute);
+app.use("/api/email", emailRoute);
+app.use("/api/bitacora", bitacoraRoute);
 app.use("/api/productos", productoRoute);
 app.use("/api/usuarios", usuarioRoute);
 app.use("/api/reportes", reporteRoute);
