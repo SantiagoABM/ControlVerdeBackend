@@ -20,7 +20,7 @@ async function buscarProductoPorCodigo(codigo) {
 }
 
 async function buscarProductoPorSubdpto(subdptos) {
-    return await Producto.find({ subdpto: { $in: subdptos } }).select('-proveedor ');;
+    return await Producto.find({ subdpto: { $in: subdptos } }).select('-precioInv');;
 }
 
 async function filtrarProductos({
