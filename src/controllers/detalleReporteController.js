@@ -181,15 +181,15 @@ const actualizarDetallePorSkus = async (req, res) => {
 const obtenerDetalleProductosBySkuYMotivo = async (req, res) => {
     try {
         const { sku, motivo } = req.body;
-        console.log(sku, motivo)
+
         const tims = await reporteService.buscarReportePorMotivo(motivo); // deber ser un array de tims
-        console.log(tims);
+
         if (!Array.isArray(tims) || tims.length === 0) {
             return res.status(404).json({ mensaje: 'No hay TIMs para ese motivo' });
         }
 
         const detalles = await detalleReporteService.obtenerDetalleProductoServiceBySkuYTims(sku, tims);
-        console.log(detalles);
+
         if (!detalles || detalles.length === 0) {
             return res.status(404).json({ mensaje: 'Detalle no encontrado' });
         }

@@ -132,7 +132,6 @@ async function buscarReportePorFechas(fechaInicio, fechaFin) {
 async function filtrarReportes(filtros) {
     const { tim, motivo, estado } = filtros;
     const query = {};
-    console.log(tim, motivo, estado)
     // Exact match para numéricos
     if (tim) {
         query.$expr = {
@@ -145,7 +144,6 @@ async function filtrarReportes(filtros) {
     }
     if (motivo) query.motivo = motivo;
     if (estado !== undefined) query.estado = estado;
-    console.log('Filtro construido:', query);
     // Si no se envía nada, devolverá todos (cuidado, puedes limitar si quieres)
     const reportes = await Reporte.find(query).lean();
     return reportes;

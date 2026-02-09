@@ -18,12 +18,12 @@ async function filtrarReportes({
     estado
 }) {
     const query = {};
-    console.log(costoPromedio)
+
     // Exact match para numéricos
     if (tim) query.tim = { $regex: tim, $options: "i" };
     if (motivo) query.motivo = motivo;
     if (estado !== undefined) query.estado = estado;
-    console.log('Filtro construido:', query);
+
     // Si no se envía nada, devolverá todos (cuidado, puedes limitar si quieres)
     const reportes = await Reporte.find(query).lean();
     return reportes;

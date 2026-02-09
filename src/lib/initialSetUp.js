@@ -4,8 +4,7 @@ const env = require('../config');
 
 exports.createAdmin = async () => {
   // check for an existing admin user
-  const userFound = await Usuario.findOne({ correo: env.ADMIN_EMAIL });
-  console.log(userFound);
+  const userFound = await Usuario.findOne({ dni: env.ADMIN_DNI });
   if (userFound) return;
   const newUser = await usuarioService.registrarUsuario({
     nombre: env.ADMIN_NAME,
@@ -17,5 +16,4 @@ exports.createAdmin = async () => {
     rol: env.ADMIN_ROL,
     esAdmin: true
   });
-  console.log(`new user created: ${newUser.correo}`);
 };

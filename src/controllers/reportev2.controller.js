@@ -7,7 +7,6 @@ const insertarReporte = async (req, res) => {
     try {
         const { tim, creadoPor } = req.body;
 
-        console.log(req.body)
         if (!creadoPor) {
             return res.status(400).json({
                 success: ENUMS.ERROR,
@@ -218,7 +217,6 @@ const buscarPorFechas = async (req, res) => {
 const buscarReportesPorFiltros = async (req, res) => {
     try {
         const filtros = req.body;
-        console.log(req.body)
         const reportes = await reporteService.filtrarReportes(filtros);
 
         return res.status(200).json({

@@ -50,13 +50,12 @@ exports.login = async (req, res) => {
     try {
         const { correo, dni, password, admin } = req.body;
         let usuario;
-        console.log(req.body)
         // 🔹 1. Login usando correo o DNI
         if (correo != null) {
             usuario = await usuarioService.autenticarUsuario(correo, password);
         } else if (dni != null) {
             usuario = await usuarioService.autenticarUsuarioPorDni(dni, password);
-            console.log(usuario)
+
         } else {
             return res.status(200).json({
                 success: ENUMS.ERROR,

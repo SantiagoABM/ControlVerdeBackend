@@ -20,7 +20,7 @@ async function buscarProductoPorCodigo(codigo) {
 }
 
 async function buscarProductoPorSubdpto(subdptos) {
-    return await Producto.find({ subdpto: { $in: subdptos } });
+    return await Producto.find({ subdpto: { $in: subdptos } }, { proveedor: 0 });
 }
 
 async function filtrarProductos({
@@ -34,7 +34,6 @@ async function filtrarProductos({
     marca
 }) {
     const filtro = {};
-    console.log(costoPromedio)
     // Exact match para numéricos
     if (sku !== undefined && sku !== null && sku !== '') {
         filtro.sku = { $regex: sku.trim(), $options: 'i' };
@@ -65,7 +64,6 @@ async function filtrarProductos({
     if (marca && marca.trim() !== '') {
         filtro.marca = { $regex: marca.trim(), $options: 'i' };
     }
-    console.log('Filtro construido:', filtro);
     // Si no se envía nada, devolverá todos (cuidado, puedes limitar si quieres)
     const productos = await Producto.find(filtro).lean();
     return productos;
@@ -166,7 +164,7 @@ async function obtenerValoresUnicos(campo) {
 }
 
 async function updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, subdpto, descripcion, marcaSensible, isContable) {
-    console.log(sku + isContable)
+
     return Producto.findOneAndUpdate(
         { sku },
         { ean, uMedida, costoPromedio, precioVigente, marca, proveedor, subdpto, descripcion, marcaSensible, isContable },

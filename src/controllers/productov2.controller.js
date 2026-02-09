@@ -6,7 +6,7 @@ const ENUMS = require('../utils/constantes.js');
 const insertarProducto = async (req, res) => {
     try {
         const producto = await productoService.insertarProducto(req.body);
-        console.log(req.usuario)
+
         if (!producto) {
             res.status(200).json({
                 success: ENUMS.ERROR,
@@ -215,7 +215,6 @@ const buscarProductosFiltrados = async (req, res) => {
 const updateDatosProducto = async (req, res) => {
     try {
         const { sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, socketId, subdpto, descripcion, marcaSensible, isContable } = req.body
-        console.log(isContable)
         const result = await productoService.updateProducto(sku, ean, uMedida, costoPromedio, precioVigente, marca, proveedor, subdpto, descripcion, marcaSensible, isContable);
 
         if (!result) {

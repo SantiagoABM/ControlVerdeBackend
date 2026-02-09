@@ -46,7 +46,7 @@ exports.autenticarUsuarioPorDni = async (dni, password) => {
 };
 
 exports.autenticarAdmin = async ({ correo, password }) => {
-    console.log(correo, password)
+
     const usuario = await Usuario.findOne({ correo: correo, esAdmin: true, activo: true });
     if (!usuario) throw new Error('Credenciales de administrador inválidas.');
     const match = await authMiddleware.verificarPassword(password, usuario.password);
@@ -82,7 +82,7 @@ exports.filtrarUsuarios = async (filtros) => {
     if (dni) query.dni = dni;
     if (activo !== undefined) query.activo = activo;
     const usuarios = await Usuario.find(query).select('-password'); // No devolver password
-    console.log(usuarios)
+
     return usuarios;
 }
 

@@ -29,8 +29,5 @@ const BitacoraAuditoriaSchema = new mongoose.Schema({
   }
 });
 
-BitacoraAuditoriaSchema.index(
-  { creadoEn: 1 }
-);
 
 module.exports = mongoose.model('BitacoraAuditoria', BitacoraAuditoriaSchema);

@@ -4,7 +4,6 @@ function setupSocket(server) {
   const io = new Server(server);
 
   io.on('connection', async (socket) => {
-    console.log('Nuevo cliente conectado');
 
     // Enviar mensajes antiguos
     const messages = await reporteController.buscarReporte();

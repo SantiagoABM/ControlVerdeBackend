@@ -33,7 +33,7 @@ const insertarDetalleReporte = async (req, res) => {
 const insertarLoteReporte = async (req, res) => {
     try {
         const { reportes } = req.body;
-        console.log(req.body)
+
         if (!Array.isArray(reportes) || reportes.length === 0) {
             return res.status(400).json({
                 success: ENUMS.ERROR,
@@ -254,7 +254,7 @@ const actualizarDetallePorSkus = async (req, res) => {
 const obtenerDetalleProductosBySkuYMotivo = async (req, res) => {
     try {
         const { sku, motivo } = req.body;
-        console.log(sku, motivo)
+
         const tims = await reporteService.buscarReportePorMotivo(motivo); // deber ser un array de tims
         if (!Array.isArray(tims) || tims.length === 0) {
             return res.status(200).json({

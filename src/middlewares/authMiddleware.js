@@ -103,7 +103,7 @@ exports.verificarToken = (req, res, next) => {
 
 exports.requiereRol = (...rolesPermitidos) => {
   return (req, res, next) => {
-    console.log(req.usuario)
+
     const rolUsuario = req.usuario.rol;
     const autorizado = rolesPermitidos.includes(rolUsuario);
 

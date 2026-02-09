@@ -7,8 +7,8 @@ mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-  .then(() => console.log("✅ Conectado a MongoDB Atlas " + uri))
-  .catch((err) => console.error("❌ Error conectando a MongoDB:", err));
+  .then(() => console.log("✅ Conectado a Base de Datos" ))
+  .catch((err) => console.error("❌ Error conectando a Base de Datos:", err));
 
 
 
