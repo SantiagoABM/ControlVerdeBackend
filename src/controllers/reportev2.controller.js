@@ -5,7 +5,7 @@ const ENUMS = require('../utils/constantes.js');
 
 const insertarReporte = async (req, res) => {
     try {
-        const { tim, creadoPor } = req.body;
+        const { tim, creadoPor, motivo } = req.body;
 
         if (!creadoPor) {
             return res.status(400).json({
@@ -19,10 +19,14 @@ const insertarReporte = async (req, res) => {
 
         if (!response) {
             await reporteService.insertarReporte(req.body);
+            if (motivo === 'T') { motivo = 'TIM' }
+            else {
+                motivo = 'Donación';
+            }
             await crearBitacoraAuditoria({
                 dni: req.usuario.dni,
                 tipo: "REPORTES",
-                mensaje: `Usuario ${req.usuario.nombres} insertó el reporte con TIM ${tim}.`
+                mensaje: `Usuario ${req.usuario.nombres} insertó el reporte #${tim} motivo: ${motivo}`
             });
             res.status(200).json({
                 success: ENUMS.SUCCESS,
@@ -136,13 +140,15 @@ const eliminarReporteyDetalles = async (req, res) => {
 
     try {
         const fechaExpiracion = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); // 2 días
-
+        const reporte = await reporteService.buscarReporte(tim);
         await detalleReporteService.marcarDetallesParaExpiracion(tim, fechaExpiracion);
         await reporteService.marcarReporteParaExpiracion(tim, fechaExpiracion);
+        if(reporte.motivo === 'T') { motivo = 'TIM' }
+        else { motivo = 'Donación' }
         await crearBitacoraAuditoria({
             dni: req.usuario.dni,
             tipo: "REPORTES",
-            mensaje: `Usuario ${req.usuario.nombres} eliminó el reporte con TIM ${tim}.`
+            mensaje: `Usuario ${req.usuario.nombres} eliminó el reporte con #${tim} motivo: ${motivo}`
         });
         res.status(200).json({
             success: ENUMS.SUCCESS,

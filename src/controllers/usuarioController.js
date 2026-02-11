@@ -94,7 +94,6 @@ exports.login = async (req, res) => {
             expiresAt: Date.now() + 3600 * 1000 // 1 hora
         });
 
-        console.log("Exito login usuario:", usuario.nombre);
         // 🚀 5. Respuesta final
         await crearBitacoraAuditoria({
             dni: usuario.dni,
@@ -160,7 +159,7 @@ exports.actualizarUsuario = async (req, res) => {
         await crearBitacoraAuditoria({
             dni: usuario.dni,
             tipo: "USUARIOS",
-            mensaje: `Usuario ${usuario.nombre} ${usuario.apellido} cambió datos del usuario ${usuarioActualizado.nombre} ${usuarioActualizado.apellido}.`
+            mensaje: `Usuario ${usuario.nombres} cambió datos del usuario ${usuarioActualizado.nombre} ${usuarioActualizado.apellido}.`
         });
         return res.status(200).json({
             success: ENUMS.SUCCESS,
