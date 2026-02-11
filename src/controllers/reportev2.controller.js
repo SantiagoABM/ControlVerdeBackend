@@ -143,7 +143,7 @@ const eliminarReporteyDetalles = async (req, res) => {
         const reporte = await reporteService.buscarReporte(tim);
         await detalleReporteService.marcarDetallesParaExpiracion(tim, fechaExpiracion);
         await reporteService.marcarReporteParaExpiracion(tim, fechaExpiracion);
-        if(reporte.motivo === 'T') { motivo = 'TIM' }
+        if (reporte.motivo === 'T') { motivo = 'TIM' }
         else { motivo = 'Donación' }
         await crearBitacoraAuditoria({
             dni: req.usuario.dni,
@@ -169,18 +169,27 @@ const reactivarTim = async (req, res) => {
     const { tim } = req.params;
 
     try {
+        const reporte = await reporteService.buscarReporte(tim);
+        if (!reporte) {
+            return res.status(404).json({
+                success: ENUMS.ERROR,
+                message: 'Reporte no encontrado',
+                datos: null
+            });
+        }
 
         await detalleReporteService.desMarcarDetallesParaExpiracion(tim);
         await reporteService.desMarcarReporteParaExpiracion(tim);
+        if (reporte.motivo === 'T') { motivo = 'TIM' }
+        else { motivo = 'Donación' }
         await crearBitacoraAuditoria({
             dni: req.usuario.dni,
             tipo: "REPORTES",
-            mensaje: `Usuario ${req.usuario.nombres} reactivó el reporte con TIM ${tim}.`
+            mensaje: `Usuario ${req.usuario.nombres} reactivó el reporte con #${tim} motivo: ${motivo}`
         });
         res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Reporte y detalles activados correctamente',
-
             datos: null
         });
     } catch (error) {
