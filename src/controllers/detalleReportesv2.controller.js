@@ -374,6 +374,20 @@ const deleteDetalleReporte = async (req, res) => {
 const cambiarEstadoEdicion = async (req, res) => {
     try {
         const { id, isEditing, salaId, socketId } = req.body;
+
+        // 🛡️ Validación de Propiedad del Bloqueo:
+        // Si intentan liberar (!isEditing), verificamos que este socket sea el que tiene el bloqueo
+        if (!isEditing && socketId) {
+            const lockInfo = global.activeLocks.get(socketId);
+            if (!lockInfo || lockInfo.detailId !== id) {
+                return res.status(200).json({
+                    success: ENUMS.ERROR,
+                    message: 'No tienes el permiso de este bloqueo originalmente',
+                    datos: null
+                });
+            }
+        }
+
         const editadoPor = isEditing ? req.usuario.nombres : '';
 
         const result = await detalleReporteService.cambiarEstadoEdicion(id, isEditing, editadoPor);
