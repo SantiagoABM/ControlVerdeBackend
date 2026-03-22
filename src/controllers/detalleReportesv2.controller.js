@@ -2,6 +2,7 @@ const detalleReporteService = require('../services/detalleReporteService.js');
 const Producto = require('../models/Producto.js');
 const reporteService = require('../services/reporteService.js');
 const DetalleReporte = require('../models/DetalleReporte.js');
+const crearBitacoraAuditoria = require('../middlewares/bitacoraMiddleware.js');
 const ENUMS = require('../utils/constantes.js');
 
 const insertarDetalleReporte = async (req, res) => {
@@ -11,7 +12,16 @@ const insertarDetalleReporte = async (req, res) => {
         const resultado = await detalleReporteService.obtenerDetalleProductoServiceBySku(result.sku, result.tim);
 
         // Emitir a todos en la sala excepto al emisor
-        req.io.to(salaId).except(socketId).emit('producto-agregado', resultado);
+        if (salaId) {
+            const io = socketId ? req.io.to(salaId).except(socketId) : req.io.to(salaId);
+            io.emit('producto-agregado', resultado);
+        }
+
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "REPORTES",
+            mensaje: `Usuario ${req.usuario.nombres} agregó SKU ${resultado.sku} al reporte #${resultado.tim}.`
+        });
 
         return res.status(200).json({
             success: ENUMS.SUCCESS,
@@ -55,7 +65,7 @@ const insertarLoteReporte = async (req, res) => {
                 sku, ean, subdpto, descripcion, casePack,
                 costoPromedio, precioVigente, uMedida,
                 tim, olpn, uEnviadas, uRecibidas,
-                fechavencimiento, observacion,modificadoPor, fastRegister
+                fechavencimiento, observacion, modificadoPor, fastRegister
             } = r;
 
             // Crear nuevo producto si no existe
@@ -101,6 +111,12 @@ const insertarLoteReporte = async (req, res) => {
             await DetalleReporte.insertMany(detalles, { ordered: false });
         }
 
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "REPORTES",
+            mensaje: `Usuario ${req.usuario.nombres} cargó lote de ${detalles.length} detalles al reporte.`
+        });
+
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Lote insertado con éxito Productos y Detalles ' + nuevosProductos.length + ' - ' + detalles.length,
@@ -141,18 +157,38 @@ const obtenerDetallesConProducto = async (req, res) => {
 
 const updateRecibidos = async (req, res) => {
     try {
-        const { id, uRecibidas, socketId,modificadoPor, salaId } = req.body
-        const result = await detalleReporteService.updateRecibidos(id, uRecibidas,modificadoPor)
+        const { id, uRecibidas, socketId, modificadoPor, salaId } = req.body
+
+        // 🔍 Validar si la cantidad es la misma para evitar actualizaciones redundantes
+        const actual = await DetalleReporte.findById(id);
+        if (actual && actual.uRecibidas === uRecibidas) {
+            return res.status(200).json({
+                success: ENUMS.SUCCESS,
+                message: 'El detalle ya tiene la misma cantidad registrada.',
+                datos: actual
+            });
+        }
+
+        const result = await detalleReporteService.updateRecibidos(id, uRecibidas, modificadoPor)
 
         if (!result) {
             return res.status(200).json({
-                success: ENUMS.SUCCESS,
+                success: ENUMS.ERROR,
                 message: 'No se encontró el reporte con ese ID',
 
                 datos: null
             });
         }
-        req.io.to(salaId).except(socketId).emit('producto-actualizado', result);
+        if (salaId) {
+            const io = socketId ? req.io.to(salaId).except(socketId) : req.io.to(salaId);
+            io.emit('producto-actualizado', result);
+        }
+
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "REPORTES",
+            mensaje: `Usuario ${req.usuario.nombres} actualizó unidades recibidas del SKU ${result.sku} en reporte #${result.tim}.`
+        });
 
         return res.status(200).json({
             success: ENUMS.SUCCESS,
@@ -172,19 +208,28 @@ const updateRecibidos = async (req, res) => {
 
 const updateDatosDetalle = async (req, res) => {
     try {
-        const { id, uRecibidas, fechavencimiento, socketId,modificadoPor, salaId } = req.body
+        const { id, uRecibidas, fechavencimiento, socketId, modificadoPor, salaId } = req.body
         const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento, modificadoPor);
 
         if (!result) {
-            res.status(200).json({
-                success: ENUMS.SUCCESS,
+            return res.status(200).json({
+                success: ENUMS.ERROR,
                 message: 'No se encontró el reporte con ese ID',
 
                 datos: null
             });
         }
 
-        req.io.to(salaId).except(socketId).emit('producto-actualizado', result);
+        if (salaId) {
+            const io = socketId ? req.io.to(salaId).except(socketId) : req.io.to(salaId);
+            io.emit('producto-actualizado', result);
+        }
+
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "REPORTES",
+            mensaje: `Usuario ${req.usuario.nombres} actualizó datos del SKU ${result.sku} en reporte #${result.tim}.`
+        });
 
         return res.status(200).json({
             success: ENUMS.SUCCESS,
@@ -295,8 +340,20 @@ const deleteDetalleReporte = async (req, res) => {
     try {
         const { id } = req.params;
         const { socketId, salaId } = req.body;
+        const detalle = await DetalleReporte.findById(id);
         await detalleReporteService.deleteDetalleRep(id);
-        req.io.to(salaId).except(socketId).emit('producto-eliminado', id);
+        if (salaId) {
+            const io = socketId ? req.io.to(salaId).except(socketId) : req.io.to(salaId);
+            io.emit('producto-eliminado', id);
+        }
+
+        if (detalle) {
+            await crearBitacoraAuditoria({
+                dni: req.usuario.dni,
+                tipo: "REPORTES",
+                mensaje: `Usuario ${req.usuario.nombres} eliminó SKU ${detalle.sku} del reporte #${detalle.tim}.`
+            });
+        }
         return res.status(200).json({
             success: ENUMS.SUCCESS,
             message: 'Detalle del reporte eliminado con éxito',
@@ -313,6 +370,43 @@ const deleteDetalleReporte = async (req, res) => {
     }
 }
 
+
+const cambiarEstadoEdicion = async (req, res) => {
+    try {
+        const { id, isEditing, salaId, socketId } = req.body;
+        const editadoPor = isEditing ? req.usuario.nombres : '';
+
+        const result = await detalleReporteService.cambiarEstadoEdicion(id, isEditing, editadoPor);
+
+        if (!result) {
+            return res.status(404).json({
+                success: ENUMS.ERROR,
+                message: 'Detalle no encontrado',
+                datos: null
+            });
+        }
+
+        // 📡 Notificar a otros usuarios
+        if (salaId) {
+            const eventName = isEditing ? 'detalle-bloqueado' : 'detalle-desbloqueado';
+            const io = socketId ? req.io.to(salaId).except(socketId) : req.io.to(salaId);
+            io.emit(eventName, { id, editadoPor });
+        }
+
+        return res.status(200).json({
+            success: ENUMS.SUCCESS,
+            message: isEditing ? 'Detalle bloqueado por edición' : 'Detalle liberado',
+            datos: result
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null
+        });
+    }
+};
+
 module.exports = {
     insertarDetalleReporte,
     insertarLoteReporte,
@@ -322,5 +416,6 @@ module.exports = {
     deleteDetalleReporte,
     obtenerDetallesConProducto,
     obtenerDetalleProducto,
-    obtenerDetalleProductosBySkuYMotivo
+    obtenerDetalleProductosBySkuYMotivo,
+    cambiarEstadoEdicion
 };

@@ -12,5 +12,6 @@ router.post('/update', verificarToken, detalleReporteController.updateRecibidos)
 router.post('/updatedr', verificarToken, detalleReporteController.updateDatosDetalle);
 router.post('/lote', verificarToken, detalleReporteController.insertarLoteReporte);
 router.post('/delete/:id', verificarToken, detalleReporteController.deleteDetalleReporte);
+router.post('/estado-edicion', verificarToken, detalleReporteController.cambiarEstadoEdicion);
 
 module.exports = router;

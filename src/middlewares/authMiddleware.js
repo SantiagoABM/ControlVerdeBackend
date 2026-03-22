@@ -12,20 +12,7 @@ exports.verificarPassword = async (password, hashedPassword) => {
   return await bcrypt.compare(password, hashedPassword);
 }
 
-exports.obtenerNombreUsuarioDesdeToken = () => {
-  try {
-    const serverToken = activeTokens.get(userId);
 
-    const decoded = jwt.verify(serverToken, SECRET);
-    return decoded.nombre;
-  } catch (err) {
-    return res.status(403).json({
-      success: ENUMS.ERROR,
-      message: "Token inválido",
-      datos: null
-    });
-  }
-}
 
 exports.generarToken = (usuario) => {
   return jwt.sign({ id: usuario._id, dni: usuario.dni, nombres: usuario.nombre + " " + usuario.apellido, rol: usuario.rol }, SECRET, { expiresIn: '24h' });
@@ -52,8 +39,7 @@ exports.verificarToken = (req, res, next) => {
     if (!serverToken) {
       return res.status(403).json({
         success: ENUMS.ERROR,
-        message: "Token inválido",
-
+        message: "Sesión no encontrada, por favor inicie sesión nuevamente",
         datos: null
       });
     }
@@ -62,14 +48,13 @@ exports.verificarToken = (req, res, next) => {
     if (serverToken.token !== token) {
       return res.status(403).json({
         success: ENUMS.ERROR,
-        message: 'Token inválido: Inicie sesión nuevamente',
-
+        message: 'Sesión inválida: Inicie sesión nuevamente',
         datos: null
       });
     }
 
     // Verificar expiración manual del servidor
-    if (Date.now() > serverToken.sAt) {
+    if (Date.now() > serverToken.expiresAt) {
       activeTokens.delete(userId);
       return res.status(403).json({
         success: ENUMS.ERROR,
@@ -108,7 +93,11 @@ exports.requiereRol = (...rolesPermitidos) => {
     const autorizado = rolesPermitidos.includes(rolUsuario);
 
     if (!autorizado) {
-      return res.status(403).json({ succes: false, code: 5, mensaje: 'Acceso denegado' });
+      return res.status(403).json({ 
+        success: ENUMS.ERROR, 
+        message: 'Acceso denegado: no tiene los permisos necesarios', 
+        datos: null 
+      });
     }
 
     next();

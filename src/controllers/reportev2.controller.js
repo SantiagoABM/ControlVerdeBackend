@@ -5,7 +5,7 @@ const ENUMS = require('../utils/constantes.js');
 
 const insertarReporte = async (req, res) => {
     try {
-        const { tim, creadoPor, motivo } = req.body;
+        let { tim, creadoPor, motivo } = req.body;
 
         if (!creadoPor) {
             return res.status(400).json({
@@ -143,6 +143,7 @@ const eliminarReporteyDetalles = async (req, res) => {
         const reporte = await reporteService.buscarReporte(tim);
         await detalleReporteService.marcarDetallesParaExpiracion(tim, fechaExpiracion);
         await reporteService.marcarReporteParaExpiracion(tim, fechaExpiracion);
+        let motivo;
         if (reporte.motivo === 'T') { motivo = 'TIM' }
         else { motivo = 'Donación' }
         await crearBitacoraAuditoria({
@@ -180,6 +181,7 @@ const reactivarTim = async (req, res) => {
 
         await detalleReporteService.desMarcarDetallesParaExpiracion(tim);
         await reporteService.desMarcarReporteParaExpiracion(tim);
+        let motivo;
         if (reporte.motivo === 'T') { motivo = 'TIM' }
         else { motivo = 'Donación' }
         await crearBitacoraAuditoria({

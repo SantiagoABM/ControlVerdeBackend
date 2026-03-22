@@ -1,7 +1,7 @@
 const DetalleReporte = require('../models/DetalleReporte.js');
 
 async function insertarDetalleReporte(detalleReporte) {
-    return await DetalleReporte.insertOne(detalleReporte);
+    return await DetalleReporte.create(detalleReporte);
 }
 
 async function insertarDetalleReporteEnLote(detalleReportes) {
@@ -205,6 +205,14 @@ async function deleteDetallesReporte(tim) {
     return await DetalleReporte.deleteMany({ tim: tim });
 }
 
+async function cambiarEstadoEdicion(id, isEditing, editadoPor) {
+    return await DetalleReporte.findByIdAndUpdate(
+        id,
+        { $set: { isEditing, editadoPor } },
+        { new: true }
+    );
+}
+
 module.exports = {
     insertarDetalleReporte,
     insertarDetalleReporteEnLote,
@@ -216,5 +224,6 @@ module.exports = {
     obtenerDetalleProductoServiceBySku,
     obtenerDetalleProductoServiceBySkuYTims,
     marcarDetallesParaExpiracion,
-    desMarcarDetallesParaExpiracion
+    desMarcarDetallesParaExpiracion,
+    cambiarEstadoEdicion
 };

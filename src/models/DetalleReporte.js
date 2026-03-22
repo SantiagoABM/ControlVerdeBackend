@@ -10,6 +10,8 @@ const detalleReporteSchema = new mongoose.Schema({
   observacion: { type: String, default: 'PERTENECE' },
   fastRegister: { type: Boolean, default: false },
   modificadoPor: String,
+  isEditing: { type: Boolean, default: false },
+  editadoPor: { type: String, default: '' },
   At: Date
 },
   {

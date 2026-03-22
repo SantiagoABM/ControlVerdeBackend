@@ -8,7 +8,7 @@ const insertarProducto = async (req, res) => {
         const producto = await productoService.insertarProducto(req.body);
 
         if (!producto) {
-            res.status(200).json({
+            return res.status(200).json({
                 success: ENUMS.ERROR,
                 message: 'No se ha podido crear el producto.',
                 datos: null
@@ -225,10 +225,15 @@ const updateDatosProducto = async (req, res) => {
             });
         }
 
-        req.io.sockets.sockets.forEach((socket) => {
-            if (socket.id !== socketId) {
-                socket.emit('producto-actualizado', result);
-            }
+        if (socketId) {
+            req.io.except(socketId).emit('producto-actualizado', result);
+        } else {
+            req.io.emit('producto-actualizado', result);
+        }
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "PRODUCTOS",
+            mensaje: `Usuario ${req.usuario.nombres} actualizó los datos del producto con sku ${sku}.`
         });
         res.status(200).json({
             success: ENUMS.SUCCESS,
@@ -259,6 +264,12 @@ const actualizarDetallePorSkus = async (req, res) => {
         }
 
         const resultado = await productoService.actualizarProductosPorSkus(skus);
+
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "PRODUCTOS",
+            mensaje: `Usuario ${req.usuario.nombres} actualizó ${skus.length} productos por SKUs.`
+        });
 
         res.status(200).json({
             success: ENUMS.SUCCESS,
@@ -311,8 +322,9 @@ const eliminarProducto = async (req, res) => {
 
         if (!deleted) {
             return res.status(404).json({
-                success: false,
+                success: ENUMS.ERROR,
                 message: "Producto no encontrado",
+                datos: null
             });
         }
         await crearBitacoraAuditoria({
@@ -320,9 +332,10 @@ const eliminarProducto = async (req, res) => {
             tipo: "PRODUCTOS",
             mensaje: `Usuario ${req.usuario.nombres} eliminó el producto con sku ${id}.`
         });
-        return res.json({
-            success: true,
+        return res.status(200).json({
+            success: ENUMS.SUCCESS,
             message: "Producto eliminado correctamente",
+            datos: null
         });
     } catch (error) {
         console.error("Error eliminando producto:", error);
