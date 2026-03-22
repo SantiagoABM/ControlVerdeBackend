@@ -31,6 +31,7 @@ io.on('connection', (socket) => {
     console.log('Nuevo socket conectado:', socket.id);
     socket.on('joinSala', (salaId) => {
         socket.join(salaId);
+        socket.salaId = salaId; // 📌 Guardamos la sala actual en el socket
         console.log(`Socket ${socket.id} se unió a la sala ${salaId}`);
         // 🧪 Confirmación al cliente
         socket.emit('joined', salaId);
@@ -41,8 +42,26 @@ io.on('connection', (socket) => {
         console.log(`Socket ${socket.id} abandonó la sala ${salaId}`);
     });
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
         console.log(`❌ Cliente desconectado: ${socket.id}`);
+        
+        // 🏗️ Auto-desbloqueo si el usuario estaba editando algo
+        const lockInfo = global.activeLocks.get(socket.id);
+        if (lockInfo) {
+            const { detailId, salaId } = lockInfo;
+            try {
+                const detalleReporteService = require('./services/detalleReporteService');
+                await detalleReporteService.cambiarEstadoEdicion(detailId, false, '');
+                
+                if (salaId) {
+                    io.to(salaId).emit('detalle-desbloqueado', { id: detailId });
+                    console.log(`🔓 Auto-desbloqueado detalle ${detailId} en sala ${salaId} por desconexión de socket ${socket.id}`);
+                }
+                global.activeLocks.delete(socket.id);
+            } catch (error) {
+                console.error('Error en auto-desbloqueo:', error.message);
+            }
+        }
     });
 });
 
@@ -63,6 +82,8 @@ app.use(cors());
 app.use(express.urlencoded({ extend: false }));
 // Map<userId, { token, expiresAt }>
 global.activeTokens = new Map();
+// Map<socketId, { detailId, salaId }>
+global.activeLocks = new Map();
 
 //rutas
 app.use((req, res, next) => {

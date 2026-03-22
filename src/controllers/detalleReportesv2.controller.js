@@ -400,6 +400,13 @@ const cambiarEstadoEdicion = async (req, res) => {
             const eventName = isEditing ? 'detalle-bloqueado' : 'detalle-desbloqueado';
             const io = socketId ? req.io.to(salaId).except(socketId) : req.io.to(salaId);
             io.emit(eventName, { id, editadoPor });
+
+            // 🏗️ Gestionar el rastro de bloqueos para auto-desbloqueo en desconexión
+            if (isEditing && socketId) {
+                global.activeLocks.set(socketId, { detailId: id, salaId });
+            } else if (!isEditing && socketId) {
+                global.activeLocks.delete(socketId);
+            }
         }
 
         return res.status(200).json({
