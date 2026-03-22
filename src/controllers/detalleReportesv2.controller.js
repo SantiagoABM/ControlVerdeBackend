@@ -379,6 +379,15 @@ const cambiarEstadoEdicion = async (req, res) => {
         const result = await detalleReporteService.cambiarEstadoEdicion(id, isEditing, editadoPor);
 
         if (!result) {
+            if (isEditing) {
+                // 🔍 Si falló el bloqueo, es porque alguien más lo ganó
+                const ocupado = await DetalleReporte.findById(id);
+                return res.status(200).json({
+                    success: ENUMS.ERROR,
+                    message: `El detalle ya está siendo editado por ${ocupado?.editadoPor || 'otro usuario'}`,
+                    datos: ocupado
+                });
+            }
             return res.status(404).json({
                 success: ENUMS.ERROR,
                 message: 'Detalle no encontrado',

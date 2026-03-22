@@ -11,7 +11,7 @@ async function insertarDetalleReporteEnLote(detalleReportes) {
 async function updateRecibidos(id, unidadesRecibidas, modificadoPor) {
     return DetalleReporte.findByIdAndUpdate(
         id,
-        { $set: { uRecibidas: unidadesRecibidas,modificadoPor} }, // Asegúrate de que 'usuario' esté definido en el contexto
+        { $set: { uRecibidas: unidadesRecibidas, modificadoPor } }, // Asegúrate de que 'usuario' esté definido en el contexto
         { new: true } // devuelve el documento actualizado
     );
 }
@@ -206,11 +206,21 @@ async function deleteDetallesReporte(tim) {
 }
 
 async function cambiarEstadoEdicion(id, isEditing, editadoPor) {
-    return await DetalleReporte.findByIdAndUpdate(
-        id,
-        { $set: { isEditing, editadoPor } },
-        { new: true }
-    );
+    if (isEditing) {
+        // 🔒 Intentar bloquear: solo si no está ya siendo editado por otro
+        return await DetalleReporte.findOneAndUpdate(
+            { _id: id, isEditing: false },
+            { $set: { isEditing: true, editadoPor } },
+            { new: true }
+        );
+    } else {
+        // 🔓 Liberar: lo liberamos y limpiamos el nombre
+        return await DetalleReporte.findByIdAndUpdate(
+            id,
+            { $set: { isEditing: false, editadoPor: '' } },
+            { new: true }
+        );
+    }
 }
 
 module.exports = {
