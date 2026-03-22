@@ -32,6 +32,8 @@ io.on('connection', (socket) => {
     socket.on('joinSala', (salaId) => {
         socket.join(salaId);
         console.log(`Socket ${socket.id} se unió a la sala ${salaId}`);
+        // 🧪 Confirmación al cliente
+        socket.emit('joined', salaId);
     });
 
     socket.on('leaveSala', (salaId) => {
@@ -53,7 +55,9 @@ app.set("json spaces", 4);
 //middlewares
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json({ limit: '50mb' }));
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false, // 🛠 Desactivar CSP temporalmente para descartar bloqueos de sockets
+}));
 app.use(morgan('dev'));
 app.use(cors());
 app.use(express.urlencoded({ extend: false }));
@@ -63,6 +67,10 @@ global.activeTokens = new Map();
 //rutas
 app.use((req, res, next) => {
     req.io = io;
+    // Log para ver si los eventos se disparan con los datos correctos
+    if (req.body && (req.body.salaId || req.body.socketId)) {
+        console.log(`[API Request] ${req.method} ${req.url} - salaId: ${req.body.salaId}, socketId: ${req.body.socketId}`);
+    }
     next();
 });
 
