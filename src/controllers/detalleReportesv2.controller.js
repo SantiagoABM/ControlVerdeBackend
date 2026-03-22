@@ -159,6 +159,27 @@ const updateRecibidos = async (req, res) => {
     try {
         const { id, uRecibidas, socketId, modificadoPor, salaId } = req.body
 
+        // 🛡️ Validación de Bloqueo: Solo el dueño del bloqueo puede actualizar
+        if (socketId) {
+            const lockInfo = global.activeLocks.get(socketId);
+            if (!lockInfo || lockInfo.detailId !== id) {
+                // Verificar en DB quién lo tiene para dar un mensaje claro
+                const ocupado = await DetalleReporte.findById(id);
+                if (ocupado && ocupado.isEditing) {
+                    return res.status(200).json({
+                        success: ENUMS.ERROR,
+                        message: `No tienes permiso para actualizar. El detalle está siendo editado por ${ocupado.editadoPor || 'otro usuario'}`,
+                        datos: ocupado
+                    });
+                }
+                return res.status(200).json({
+                    success: ENUMS.ERROR,
+                    message: 'No tienes un bloqueo activo para este detalle. Por favor, intenta editar de nuevo.',
+                    datos: null
+                });
+            }
+        }
+
         // 🔍 Validar si la cantidad es la misma para evitar actualizaciones redundantes
         const actual = await DetalleReporte.findById(id);
         if (actual && actual.uRecibidas === uRecibidas) {
