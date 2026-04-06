@@ -16,12 +16,25 @@ async function updateRecibidos(id, unidadesRecibidas, modificadoPor) {
     );
 }
 
-async function updateDatos(id, uRecibidas, fechavencimiento, modificadoPor) {
+async function updateDatos(id, uRecibidas, fechavencimiento, modificadoPor, olpn) {
+    const updateData = { uRecibidas, fechavencimiento, modificadoPor };
+    if (olpn !== undefined) updateData.olpn = olpn;
+    
     return DetalleReporte.findByIdAndUpdate(
         id,
-        { $set: { uRecibidas, fechavencimiento, modificadoPor } },
+        { $set: updateData },
         { new: true } // devuelve el documento actualizado
     );
+}
+
+async function verificarDuplicadoOLPN(olpn, tim, excludeId) {
+    if (!olpn || !tim) return null;
+    
+    // Buscar si existe otra caja con el mismo OLPN en el mismo TIM
+    const query = { olpn, tim: Number(tim) };
+    if (excludeId) query._id = { $ne: excludeId };
+    
+    return await DetalleReporte.findOne(query).lean();
 }
 
 
