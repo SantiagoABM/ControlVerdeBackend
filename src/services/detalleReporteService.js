@@ -248,5 +248,6 @@ module.exports = {
     obtenerDetalleProductoServiceBySkuYTims,
     marcarDetallesParaExpiracion,
     desMarcarDetallesParaExpiracion,
+    verificarDuplicadoOLPN,
     cambiarEstadoEdicion
 };
