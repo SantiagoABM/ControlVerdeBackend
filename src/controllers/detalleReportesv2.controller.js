@@ -7,25 +7,7 @@ const ENUMS = require('../utils/constantes.js');
 
 const insertarDetalleReporte = async (req, res) => {
     try {
-        const { socketId, detalleReporte, salaId, forceSave } = req.body; // <- forceSave para confirmación de duplicados
-        
-        // 🔍 Validar duplicado si el motivo es IPGC
-        const reporte = await reporteService.buscarReporte(detalleReporte.tim);
-        if (reporte && reporte.motivo === 'IPGC') {
-            const duplicado = await detalleReporteService.verificarDuplicadoOLPN(detalleReporte.olpn, detalleReporte.tim);
-            if (duplicado && forceSave !== true) {
-                return res.status(200).json({
-                    success: ENUMS.ERROR,
-                    message: 'La caja ya existe en este pallet.',
-                    datos: {
-                        warning: 'DUPLICATE_OLPN',
-                        timExistente: duplicado.tim,
-                        mensaje: 'La caja ya existe en este pallet. ¿Deseas continuar?'
-                    }
-                });
-            }
-        }
-
+        const { socketId, detalleReporte, salaId } = req.body; // <- salaId enviado desde frontend
         const result = await detalleReporteService.insertarDetalleReporte(detalleReporte);
         const resultado = await detalleReporteService.obtenerDetalleProductoServiceBySku(result.sku, result.tim);
 
@@ -247,31 +229,8 @@ const updateRecibidos = async (req, res) => {
 
 const updateDatosDetalle = async (req, res) => {
     try {
-        const { id, uRecibidas, fechavencimiento, socketId, modificadoPor, salaId, forceSave, olpn } = req.body
-        
-        // 🔍 Validar duplicado si el motivo es IPGC
-        const actual = await DetalleReporte.findById(id);
-        if (actual) {
-            const reporte = await reporteService.buscarReporte(actual.tim);
-            if (reporte && reporte.motivo === 'IPGC') {
-                const olpnAValidar = olpn || actual.olpn;
-                const duplicado = await detalleReporteService.verificarDuplicadoOLPN(olpnAValidar, actual.tim, id);
-                
-                if (duplicado && forceSave !== true) {
-                    return res.status(200).json({
-                        success: ENUMS.ERROR,
-                        message: 'La caja ya existe en este pallet.',
-                        datos: {
-                            warning: 'DUPLICATE_OLPN',
-                            timExistente: duplicado.tim,
-                            mensaje: 'La caja ya existe en este pallet. ¿Deseas continuar?'
-                        }
-                    });
-                }
-            }
-        }
-
-        const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento, modificadoPor, olpn);
+        const { id, uRecibidas, fechavencimiento, socketId, modificadoPor, salaId } = req.body
+        const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento, modificadoPor);
 
         if (!result) {
             return res.status(200).json({

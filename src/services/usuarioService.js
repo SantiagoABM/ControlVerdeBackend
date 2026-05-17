@@ -71,6 +71,44 @@ exports.buscarUsuarioPorDni = async (correo) => {
     if (!usuario) throw new Error('Usuario no encontrado.');
     return usuario;
 };
+
+exports.cambiarPassword = async (usuarioId, passwordActual, nuevaPassword) => {
+    const usuario = await Usuario.findById(usuarioId);
+    if (!usuario) throw new Error('Usuario no encontrado.');
+
+    // Verificar password actual
+    const match = await authMiddleware.verificarPassword(passwordActual, usuario.password);
+    if (!match) throw new Error('La contraseña actual es incorrecta.');
+
+    // Encriptar nueva password
+    const hashedPassword = await authMiddleware.encriptarPassword(nuevaPassword);
+
+    // Actualizar usuario
+    usuario.password = hashedPassword;
+    usuario.updatePass = true; // Flag cambiado a true
+
+    await usuario.save();
+    return true;
+}
+
+exports.reestablecerPassword = async (id) => {
+    const usuario = await Usuario.findById(id);
+    if (!usuario) throw new Error('Usuario no encontrado.');
+
+    // 6 primeros dígitos del DNI
+    const passwordPlano = String(usuario.dni).slice(0, 6);
+
+    // Encriptar nueva password
+    const hashedPassword = await authMiddleware.encriptarPassword(passwordPlano);
+
+    // Actualizar usuario
+    usuario.password = hashedPassword;
+    usuario.updatePass = false; // Flag cambiado a false para que lo obligue a cambiar
+
+    await usuario.save();
+    return usuario;
+}
+
 exports.filtrarUsuarios = async (filtros) => {
     const { nombre, correo, rol, activo, dni } = filtros;
 

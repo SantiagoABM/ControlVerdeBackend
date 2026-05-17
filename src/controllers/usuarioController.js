@@ -38,9 +38,19 @@ exports.register = async (req, res) => {
             }
         });
     } catch (error) {
+        let mensajeError = error.message;
+        if (error.code === 11000) {
+            if (error.keyPattern?.correo) {
+                mensajeError = "El correo ingresado ya se encuentra registrado por otro usuario.";
+            } else if (error.keyPattern?.dni) {
+                mensajeError = "El DNI ingresado ya se encuentra registrado por otro usuario.";
+            } else {
+                mensajeError = "El dato ingresado ya se encuentra en uso.";
+            }
+        }
         return res.status(401).json({
             success: ENUMS.ERROR,
-            message: error.message,
+            message: mensajeError,
             datos: null
         });
     }
@@ -104,8 +114,10 @@ exports.login = async (req, res) => {
             success: ENUMS.SUCCESS,
             message: admin ? "Inicio de sesión administrador exitoso." : "Inicio de sesión exitoso.",
             datos: {
+                id: usuario._id,
                 token,
                 nombre: usuario.nombre + " " + usuario.apellido,
+                correo: usuario.correo,
                 rol: usuario.rol,
                 updatePass: usuario.updatePass
             }
@@ -132,6 +144,67 @@ exports.buscarUsuarios = async (req, res) => {
             datos: usuarios
         });
 
+    } catch (error) {
+        return res.status(400).json({
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null
+        });
+    }
+}
+
+exports.actualizarPassword = async (req, res) => {
+    try {
+        const usuarioId = req.usuario.id;
+        const { passwordActual, nuevaPassword } = req.body;
+
+        if (!passwordActual || !nuevaPassword) {
+            return res.status(400).json({
+                success: ENUMS.ERROR,
+                message: "Se requiere la contraseña actual y la nueva contraseña.",
+                datos: null
+            });
+        }
+
+        await usuarioService.cambiarPassword(usuarioId, passwordActual, nuevaPassword);
+        
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "USUARIOS",
+            mensaje: `Usuario ${req.usuario.nombres} actualizó su contraseña.`
+        });
+
+        return res.status(200).json({
+            success: ENUMS.SUCCESS,
+            message: "Contraseña actualizada correctamente.",
+            datos: null
+        });
+
+    } catch (error) {
+        return res.status(400).json({
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null
+        });
+    }
+}
+
+exports.reestablecerPassword = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const usuarioReestablecido = await usuarioService.reestablecerPassword(id);
+        
+        await crearBitacoraAuditoria({
+            dni: req.usuario.dni,
+            tipo: "USUARIOS",
+            mensaje: `Usuario ${req.usuario.nombres} reestableció la contraseña del usuario ${usuarioReestablecido.nombre} ${usuarioReestablecido.apellido}.`
+        });
+
+        return res.status(200).json({
+            success: ENUMS.SUCCESS,
+            message: "Contraseña reestablecida correctamente.",
+            datos: null
+        });
     } catch (error) {
         return res.status(400).json({
             success: ENUMS.ERROR,
@@ -168,9 +241,19 @@ exports.actualizarUsuario = async (req, res) => {
         });
 
     } catch (error) {
+        let mensajeError = error.message;
+        if (error.code === 11000) {
+            if (error.keyPattern?.correo) {
+                mensajeError = "El correo ingresado ya se encuentra registrado por otro usuario.";
+            } else if (error.keyPattern?.dni) {
+                mensajeError = "El DNI ingresado ya se encuentra registrado por otro usuario.";
+            } else {
+                mensajeError = "El dato ingresado ya se encuentra en uso.";
+            }
+        }
         return res.status(400).json({
             success: ENUMS.ERROR,
-            message: error.message,
+            message: mensajeError,
             datos: null
         });
     }
