@@ -58,11 +58,11 @@ async function filtrarProductos({
     }
 
     if (proveedor && proveedor.trim() !== '') {
-        filtro.proveedor = { $regex: proveedor.trim(), $options: 'i' };
+        filtro.proveedor = { $regex: proveedor, $options: 'i' };
     }
 
     if (marca && marca.trim() !== '') {
-        filtro.marca = { $regex: marca.trim(), $options: 'i' };
+        filtro.marca = { $regex: marca, $options: 'i' };
     }
     // Si no se envía nada, devolverá todos (cuidado, puedes limitar si quieres)
     const productos = await Producto.find(filtro).lean();
