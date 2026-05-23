@@ -42,7 +42,7 @@ async function filtrarProductos({
         filtro.ean = { $regex: ean.trim(), $options: 'i' };
     }
     if (subdpto !== undefined && subdpto !== null && subdpto !== '') {
-        filtro.subdpto = { $regex: subdpto.trim(), $options: 'i' };
+        filtro.subdpto = { $regex: subdpto, $options: 'i' };
     }
     if (costoPromedio !== undefined && costoPromedio !== null && costoPromedio !== '') {
         filtro.costoPromedio = Number(costoPromedio);
