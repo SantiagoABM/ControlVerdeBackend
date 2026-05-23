@@ -36,13 +36,22 @@ async function filtrarProductos({
     const filtro = {};
     // Exact match para numéricos
     if (sku !== undefined && sku !== null && sku !== '') {
-        filtro.sku = { $regex: sku.trim(), $options: 'i' };
+        const skuStr = typeof sku === 'object' ? '' : String(sku).trim();
+        if (skuStr !== '') {
+            filtro.sku = { $regex: skuStr, $options: 'i' };
+        }
     }
     if (ean !== undefined && ean !== null && ean !== '') {
-        filtro.ean = { $regex: ean.trim(), $options: 'i' };
+        const eanStr = typeof ean === 'object' ? '' : String(ean).trim();
+        if (eanStr !== '') {
+            filtro.ean = { $regex: eanStr, $options: 'i' };
+        }
     }
     if (subdpto !== undefined && subdpto !== null && subdpto !== '') {
-        filtro.subdpto = { $regex: subdpto, $options: 'i' };
+        const subdptoStr = typeof subdpto === 'object' ? '' : String(subdpto).trim();
+        if (subdptoStr !== '') {
+            filtro.subdpto = { $regex: subdptoStr, $options: 'i' };
+        }
     }
     if (costoPromedio !== undefined && costoPromedio !== null && costoPromedio !== '') {
         filtro.costoPromedio = Number(costoPromedio);
@@ -53,16 +62,25 @@ async function filtrarProductos({
     }
 
     // Búsquedas "contains" case-insensitive para strings
-    if (descripcion && descripcion.trim() !== '') {
-        filtro.descripcion = { $regex: descripcion.trim(), $options: 'i' };
+    if (descripcion !== undefined && descripcion !== null) {
+        const descripcionStr = typeof descripcion === 'object' ? '' : String(descripcion).trim();
+        if (descripcionStr !== '') {
+            filtro.descripcion = { $regex: descripcionStr, $options: 'i' };
+        }
     }
 
-    if (proveedor && proveedor.trim() !== '') {
-        filtro.proveedor = { $regex: proveedor, $options: 'i' };
+    if (proveedor !== undefined && proveedor !== null) {
+        const proveedorStr = typeof proveedor === 'object' ? '' : String(proveedor).trim();
+        if (proveedorStr !== '') {
+            filtro.proveedor = { $regex: proveedorStr, $options: 'i' };
+        }
     }
 
-    if (marca && marca.trim() !== '') {
-        filtro.marca = { $regex: marca, $options: 'i' };
+    if (marca !== undefined && marca !== null) {
+        const marcaStr = typeof marca === 'object' ? '' : String(marca).trim();
+        if (marcaStr !== '') {
+            filtro.marca = { $regex: marcaStr, $options: 'i' };
+        }
     }
     // Si no se envía nada, devolverá todos (cuidado, puedes limitar si quieres)
     const productos = await Producto.find(filtro).lean();

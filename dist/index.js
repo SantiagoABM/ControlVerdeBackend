@@ -39287,6 +39287,27 @@ var require_usuarioService = __commonJS({
       if (!usuario) throw new Error("Usuario no encontrado.");
       return usuario;
     };
+    exports2.cambiarPassword = async (usuarioId, passwordActual, nuevaPassword) => {
+      const usuario = await Usuario.findById(usuarioId);
+      if (!usuario) throw new Error("Usuario no encontrado.");
+      const match = await authMiddleware.verificarPassword(passwordActual, usuario.password);
+      if (!match) throw new Error("La contrase\xF1a actual es incorrecta.");
+      const hashedPassword = await authMiddleware.encriptarPassword(nuevaPassword);
+      usuario.password = hashedPassword;
+      usuario.updatePass = true;
+      await usuario.save();
+      return true;
+    };
+    exports2.reestablecerPassword = async (id) => {
+      const usuario = await Usuario.findById(id);
+      if (!usuario) throw new Error("Usuario no encontrado.");
+      const passwordPlano = String(usuario.dni).slice(0, 6);
+      const hashedPassword = await authMiddleware.encriptarPassword(passwordPlano);
+      usuario.password = hashedPassword;
+      usuario.updatePass = false;
+      await usuario.save();
+      return usuario;
+    };
     exports2.filtrarUsuarios = async (filtros) => {
       const { nombre, correo, rol, activo, dni: dni2 } = filtros;
       const query = {};
@@ -39452,9 +39473,19 @@ var require_usuarioController = __commonJS({
           }
         });
       } catch (error) {
+        let mensajeError = error.message;
+        if (error.code === 11e3) {
+          if (error.keyPattern?.correo) {
+            mensajeError = "El correo ingresado ya se encuentra registrado por otro usuario.";
+          } else if (error.keyPattern?.dni) {
+            mensajeError = "El DNI ingresado ya se encuentra registrado por otro usuario.";
+          } else {
+            mensajeError = "El dato ingresado ya se encuentra en uso.";
+          }
+        }
         return res.status(401).json({
           success: ENUMS.ERROR,
-          message: error.message,
+          message: mensajeError,
           datos: null
         });
       }
@@ -39496,8 +39527,10 @@ var require_usuarioController = __commonJS({
           success: ENUMS.SUCCESS,
           message: admin ? "Inicio de sesi\xF3n administrador exitoso." : "Inicio de sesi\xF3n exitoso.",
           datos: {
+            id: usuario._id,
             token,
             nombre: usuario.nombre + " " + usuario.apellido,
+            correo: usuario.correo,
             rol: usuario.rol,
             updatePass: usuario.updatePass
           }
@@ -39518,6 +39551,58 @@ var require_usuarioController = __commonJS({
           success: ENUMS.SUCCESS,
           message: "Usuarios obtenidos",
           datos: usuarios
+        });
+      } catch (error) {
+        return res.status(400).json({
+          success: ENUMS.ERROR,
+          message: error.message,
+          datos: null
+        });
+      }
+    };
+    exports2.actualizarPassword = async (req, res) => {
+      try {
+        const usuarioId = req.usuario.id;
+        const { passwordActual, nuevaPassword } = req.body;
+        if (!passwordActual || !nuevaPassword) {
+          return res.status(400).json({
+            success: ENUMS.ERROR,
+            message: "Se requiere la contrase\xF1a actual y la nueva contrase\xF1a.",
+            datos: null
+          });
+        }
+        await usuarioService.cambiarPassword(usuarioId, passwordActual, nuevaPassword);
+        await crearBitacoraAuditoria({
+          dni: req.usuario.dni,
+          tipo: "USUARIOS",
+          mensaje: `Usuario ${req.usuario.nombres} actualiz\xF3 su contrase\xF1a.`
+        });
+        return res.status(200).json({
+          success: ENUMS.SUCCESS,
+          message: "Contrase\xF1a actualizada correctamente.",
+          datos: null
+        });
+      } catch (error) {
+        return res.status(400).json({
+          success: ENUMS.ERROR,
+          message: error.message,
+          datos: null
+        });
+      }
+    };
+    exports2.reestablecerPassword = async (req, res) => {
+      try {
+        const { id } = req.params;
+        const usuarioReestablecido = await usuarioService.reestablecerPassword(id);
+        await crearBitacoraAuditoria({
+          dni: req.usuario.dni,
+          tipo: "USUARIOS",
+          mensaje: `Usuario ${req.usuario.nombres} reestableci\xF3 la contrase\xF1a del usuario ${usuarioReestablecido.nombre} ${usuarioReestablecido.apellido}.`
+        });
+        return res.status(200).json({
+          success: ENUMS.SUCCESS,
+          message: "Contrase\xF1a reestablecida correctamente.",
+          datos: null
         });
       } catch (error) {
         return res.status(400).json({
@@ -39551,9 +39636,19 @@ var require_usuarioController = __commonJS({
           datos: usuarioActualizado
         });
       } catch (error) {
+        let mensajeError = error.message;
+        if (error.code === 11e3) {
+          if (error.keyPattern?.correo) {
+            mensajeError = "El correo ingresado ya se encuentra registrado por otro usuario.";
+          } else if (error.keyPattern?.dni) {
+            mensajeError = "El DNI ingresado ya se encuentra registrado por otro usuario.";
+          } else {
+            mensajeError = "El dato ingresado ya se encuentra en uso.";
+          }
+        }
         return res.status(400).json({
           success: ENUMS.ERROR,
-          message: error.message,
+          message: mensajeError,
           datos: null
         });
       }
@@ -39600,6 +39695,8 @@ var require_usuarioRoute = __commonJS({
     router.post("/crear", verificarToken, usuarioController.register);
     router.post("/filtros", verificarToken, usuarioController.buscarUsuarios);
     router.post("/update/:id", verificarToken, usuarioController.actualizarUsuario);
+    router.post("/actualizar-password", verificarToken, usuarioController.actualizarPassword);
+    router.post("/reestablecer-password/:id", verificarToken, usuarioController.reestablecerPassword);
     module2.exports = router;
   }
 });
@@ -39667,13 +39764,22 @@ var require_productoService = __commonJS({
     }) {
       const filtro = {};
       if (sku !== void 0 && sku !== null && sku !== "") {
-        filtro.sku = { $regex: sku.trim(), $options: "i" };
+        const skuStr = typeof sku === "object" ? "" : String(sku).trim();
+        if (skuStr !== "") {
+          filtro.sku = { $regex: skuStr, $options: "i" };
+        }
       }
       if (ean !== void 0 && ean !== null && ean !== "") {
-        filtro.ean = { $regex: ean.trim(), $options: "i" };
+        const eanStr = typeof ean === "object" ? "" : String(ean).trim();
+        if (eanStr !== "") {
+          filtro.ean = { $regex: eanStr, $options: "i" };
+        }
       }
       if (subdpto !== void 0 && subdpto !== null && subdpto !== "") {
-        filtro.subdpto = { $regex: subdpto.trim(), $options: "i" };
+        const subdptoStr = typeof subdpto === "object" ? "" : String(subdpto).trim();
+        if (subdptoStr !== "") {
+          filtro.subdpto = { $regex: subdptoStr, $options: "i" };
+        }
       }
       if (costoPromedio !== void 0 && costoPromedio !== null && costoPromedio !== "") {
         filtro.costoPromedio = Number(costoPromedio);
@@ -39681,14 +39787,23 @@ var require_productoService = __commonJS({
       if (casePack !== void 0 && casePack !== null && casePack !== "") {
         filtro.casePack = Number(casePack);
       }
-      if (descripcion && descripcion.trim() !== "") {
-        filtro.descripcion = { $regex: descripcion.trim(), $options: "i" };
+      if (descripcion !== void 0 && descripcion !== null) {
+        const descripcionStr = typeof descripcion === "object" ? "" : String(descripcion).trim();
+        if (descripcionStr !== "") {
+          filtro.descripcion = { $regex: descripcionStr, $options: "i" };
+        }
       }
-      if (proveedor && proveedor.trim() !== "") {
-        filtro.proveedor = { $regex: proveedor.trim(), $options: "i" };
+      if (proveedor !== void 0 && proveedor !== null) {
+        const proveedorStr = typeof proveedor === "object" ? "" : String(proveedor).trim();
+        if (proveedorStr !== "") {
+          filtro.proveedor = { $regex: proveedorStr, $options: "i" };
+        }
       }
-      if (marca && marca.trim() !== "") {
-        filtro.marca = { $regex: marca.trim(), $options: "i" };
+      if (marca !== void 0 && marca !== null) {
+        const marcaStr = typeof marca === "object" ? "" : String(marca).trim();
+        if (marcaStr !== "") {
+          filtro.marca = { $regex: marcaStr, $options: "i" };
+        }
       }
       const productos = await Producto.find(filtro).lean();
       return productos;
@@ -40684,11 +40799,19 @@ var require_detalleReporteService = __commonJS({
       return await DetalleReporte.deleteMany({ tim });
     }
     async function cambiarEstadoEdicion(id, isEditing, editadoPor) {
-      return await DetalleReporte.findByIdAndUpdate(
-        id,
-        { $set: { isEditing, editadoPor } },
-        { new: true }
-      );
+      if (isEditing) {
+        return await DetalleReporte.findOneAndUpdate(
+          { _id: id, isEditing: false },
+          { $set: { isEditing: true, editadoPor } },
+          { new: true }
+        );
+      } else {
+        return await DetalleReporte.findByIdAndUpdate(
+          id,
+          { $set: { isEditing: false, editadoPor: "" } },
+          { new: true }
+        );
+      }
     }
     module2.exports = {
       insertarDetalleReporte,
@@ -41163,6 +41286,24 @@ var require_detalleReportesv2_controller = __commonJS({
     var updateRecibidos = async (req, res) => {
       try {
         const { id, uRecibidas, socketId, modificadoPor, salaId } = req.body;
+        if (socketId) {
+          const lockInfo = global.activeLocks.get(socketId);
+          if (!lockInfo || lockInfo.detailId !== id) {
+            const ocupado = await DetalleReporte.findById(id);
+            if (ocupado && ocupado.isEditing) {
+              return res.status(200).json({
+                success: ENUMS.ERROR,
+                message: `No tienes permiso para actualizar. El detalle est\xE1 siendo editado por ${ocupado.editadoPor || "otro usuario"}`,
+                datos: ocupado
+              });
+            }
+            return res.status(200).json({
+              success: ENUMS.ERROR,
+              message: "No tienes un bloqueo activo para este detalle. Por favor, intenta editar de nuevo.",
+              datos: null
+            });
+          }
+        }
         const actual = await DetalleReporte.findById(id);
         if (actual && actual.uRecibidas === uRecibidas) {
           return res.status(200).json({
@@ -41340,9 +41481,27 @@ var require_detalleReportesv2_controller = __commonJS({
     var cambiarEstadoEdicion = async (req, res) => {
       try {
         const { id, isEditing, salaId, socketId } = req.body;
+        if (!isEditing && socketId) {
+          const lockInfo = global.activeLocks.get(socketId);
+          if (!lockInfo || lockInfo.detailId !== id) {
+            return res.status(200).json({
+              success: ENUMS.ERROR,
+              message: "No tienes el permiso de este bloqueo originalmente",
+              datos: null
+            });
+          }
+        }
         const editadoPor = isEditing ? req.usuario.nombres : "";
         const result = await detalleReporteService.cambiarEstadoEdicion(id, isEditing, editadoPor);
         if (!result) {
+          if (isEditing) {
+            const ocupado = await DetalleReporte.findById(id);
+            return res.status(200).json({
+              success: ENUMS.ERROR,
+              message: `El detalle ya est\xE1 siendo editado por ${ocupado?.editadoPor || "otro usuario"}`,
+              datos: ocupado
+            });
+          }
           return res.status(404).json({
             success: ENUMS.ERROR,
             message: "Detalle no encontrado",
@@ -41353,6 +41512,11 @@ var require_detalleReportesv2_controller = __commonJS({
           const eventName = isEditing ? "detalle-bloqueado" : "detalle-desbloqueado";
           const io = socketId ? req.io.to(salaId).except(socketId) : req.io.to(salaId);
           io.emit(eventName, { id, editadoPor });
+          if (isEditing && socketId) {
+            global.activeLocks.set(socketId, { detailId: id, salaId });
+          } else if (!isEditing && socketId) {
+            global.activeLocks.delete(socketId);
+          }
         }
         return res.status(200).json({
           success: ENUMS.SUCCESS,
@@ -53639,27 +53803,51 @@ var require_app = __commonJS({
       console.log("Nuevo socket conectado:", socket.id);
       socket.on("joinSala", (salaId) => {
         socket.join(salaId);
+        socket.salaId = salaId;
         console.log(`Socket ${socket.id} se uni\xF3 a la sala ${salaId}`);
+        socket.emit("joined", salaId);
       });
       socket.on("leaveSala", (salaId) => {
         socket.leave(salaId);
         console.log(`Socket ${socket.id} abandon\xF3 la sala ${salaId}`);
       });
-      socket.on("disconnect", () => {
+      socket.on("disconnect", async () => {
         console.log(`\u274C Cliente desconectado: ${socket.id}`);
+        const lockInfo = global.activeLocks.get(socket.id);
+        if (lockInfo) {
+          const { detailId, salaId } = lockInfo;
+          try {
+            const detalleReporteService = require_detalleReporteService();
+            await detalleReporteService.cambiarEstadoEdicion(detailId, false, "");
+            if (salaId) {
+              io.to(salaId).emit("detalle-desbloqueado", { id: detailId });
+              console.log(`\u{1F513} Auto-desbloqueado detalle ${detailId} en sala ${salaId} por desconexi\xF3n de socket ${socket.id}`);
+            }
+            global.activeLocks.delete(socket.id);
+          } catch (error) {
+            console.error("Error en auto-desbloqueo:", error.message);
+          }
+        }
       });
     });
     app.set("pkg", pkg);
     app.set("json spaces", 4);
     app.use(express.static(path.join(__dirname, "public")));
     app.use(express.json({ limit: "50mb" }));
-    app.use(helmet());
+    app.use(helmet({
+      contentSecurityPolicy: false
+      // 🛠 Desactivar CSP temporalmente para descartar bloqueos de sockets
+    }));
     app.use(morgan("dev"));
     app.use(cors());
     app.use(express.urlencoded({ extend: false }));
     global.activeTokens = /* @__PURE__ */ new Map();
+    global.activeLocks = /* @__PURE__ */ new Map();
     app.use((req, res, next) => {
       req.io = io;
+      if (req.body && (req.body.salaId || req.body.socketId)) {
+        console.log(`[API Request] ${req.method} ${req.url} - salaId: ${req.body.salaId}, socketId: ${req.body.socketId}`);
+      }
       next();
     });
     app.use("/api", testRoute);
