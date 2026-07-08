@@ -1,0 +1,12 @@
+El code es el estado de la solicitud
+por mientras se usará el estado
+0 = Éxito
+1 = Fallo del servidor
+2 = Error en la solicitud
+3 = Datos inválidos
+4 = Token vencido
+5 = Permiso Denegado Requiere Rol
+
+
+
+

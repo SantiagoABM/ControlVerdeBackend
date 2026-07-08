@@ -9,9 +9,17 @@ const detalleReporteSchema = new mongoose.Schema({
   fechavencimiento: String,
   observacion: { type: String, default: 'PERTENECE' },
   fastRegister: { type: Boolean, default: false },
-  expireAt: { type: Date, default: null }
-});
+  modificadoPor: String,
+  isEditing: { type: Boolean, default: false },
+  editadoPor: { type: String, default: '' },
+  At: Date
+},
+  {
+    timestamps: true
+  }
+);
 
-detalleReporteSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
+detalleReporteSchema.index({ At: 1 }, { AfterSeconds: 0 });
+detalleReporteSchema.index({ tim: 1 });
 
 module.exports = mongoose.model('DetalleReporte', detalleReporteSchema);

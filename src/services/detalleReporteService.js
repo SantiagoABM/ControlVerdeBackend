@@ -1,25 +1,25 @@
 const DetalleReporte = require('../models/DetalleReporte.js');
 
 async function insertarDetalleReporte(detalleReporte) {
-    return await DetalleReporte.insertOne(detalleReporte);
+    return await DetalleReporte.create(detalleReporte);
 }
 
 async function insertarDetalleReporteEnLote(detalleReportes) {
     return await DetalleReporte.insertMany(detalleReportes, { ordered: false });
 }
 
-async function updateRecibidos(id, unidadesRecibidas, idUsuario) {
+async function updateRecibidos(id, unidadesRecibidas, modificadoPor) {
     return DetalleReporte.findByIdAndUpdate(
         id,
-        {$set :{ uRecibidas: unidadesRecibidas, usuario: idUsuario }}, // Asegúrate de que 'usuario' esté definido en el contexto
+        { $set: { uRecibidas: unidadesRecibidas, modificadoPor } }, // Asegúrate de que 'usuario' esté definido en el contexto
         { new: true } // devuelve el documento actualizado
     );
 }
 
-async function updateDatos(id, uRecibidas, fechavencimiento, idUsuario) {
+async function updateDatos(id, uRecibidas, fechavencimiento, modificadoPor) {
     return DetalleReporte.findByIdAndUpdate(
         id,
-        {$set:{ uRecibidas, fechavencimiento , usuario: idUsuario}},
+        { $set: { uRecibidas, fechavencimiento, modificadoPor } },
         { new: true } // devuelve el documento actualizado
     );
 }
@@ -65,7 +65,10 @@ const obtenerDetallesConProductoService = async (tim) => {
                 uRecibidas: 1,
                 fechavencimiento: 1,
                 observacion: 1,
-                fastRegister: 1
+                marcaSensible: { $ifNull: ['$productoInfo.marcaSensible', false] },
+                isContable: { $ifNull: ['$productoInfo.isContable', false] },
+                fastRegister: 1,
+                modificadoPor: 1
             }
         }
     ]);
@@ -131,11 +134,13 @@ const obtenerDetalleProductoServiceBySkuYTims = async (sku, tims) => {
 
 const obtenerDetalleProductoServiceBySku = async (sku, tim) => {
     const resultados = await DetalleReporte.aggregate([
-        { $match: { sku: String(sku),
-            tim: Number(tim)
-         }
-        
-    },
+        {
+            $match: {
+                sku: String(sku),
+                tim: Number(tim)
+            }
+
+        },
         {
             $lookup: {
                 from: 'productos',
@@ -174,7 +179,9 @@ const obtenerDetalleProductoServiceBySku = async (sku, tim) => {
                 uRecibidas: 1,
                 fechavencimiento: 1,
                 observacion: 1,
-                fastRegister: 1
+                fastRegister: 1,
+                marcaSensible: { $ifNull: ['$productoInfo.marcaSensible', false] },
+                isContable: { $ifNull: ['$productoInfo.isContable', false] }
             }
         }
     ]);
@@ -186,12 +193,34 @@ async function marcarDetallesParaExpiracion(tim, fecha) {
     return await DetalleReporte.updateMany({ tim }, { $set: { expireAt: fecha } });
 }
 
+async function desMarcarDetallesParaExpiracion(tim) {
+    return await DetalleReporte.updateMany({ tim }, { $set: { expireAt: null } });
+}
+
 async function deleteDetalleRep(id) {
     await DetalleReporte.findByIdAndDelete(id);
 }
 
 async function deleteDetallesReporte(tim) {
-    return await DetalleReporte.deleteMany({ tim:tim });
+    return await DetalleReporte.deleteMany({ tim: tim });
+}
+
+async function cambiarEstadoEdicion(id, isEditing, editadoPor) {
+    if (isEditing) {
+        // 🔒 Intentar bloquear: solo si no está ya siendo editado por otro
+        return await DetalleReporte.findOneAndUpdate(
+            { _id: id, isEditing: false },
+            { $set: { isEditing: true, editadoPor } },
+            { new: true }
+        );
+    } else {
+        // 🔓 Liberar: lo liberamos y limpiamos el nombre
+        return await DetalleReporte.findByIdAndUpdate(
+            id,
+            { $set: { isEditing: false, editadoPor: '' } },
+            { new: true }
+        );
+    }
 }
 
 module.exports = {
@@ -204,5 +233,7 @@ module.exports = {
     obtenerDetallesConProductoService,
     obtenerDetalleProductoServiceBySku,
     obtenerDetalleProductoServiceBySkuYTims,
-    marcarDetallesParaExpiracion
+    marcarDetallesParaExpiracion,
+    desMarcarDetallesParaExpiracion,
+    cambiarEstadoEdicion
 };

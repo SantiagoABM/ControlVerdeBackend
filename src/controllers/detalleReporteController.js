@@ -5,13 +5,13 @@ const DetalleReporte = require('../models/DetalleReporte.js');
 
 const insertarDetalleReporte = async (req, res) => {
     try {
-        const { socketId, detalleReporte, salaId } = req.body; // <- salaId enviado desde frontend
+        const { socketId, detalleReporte, salaId, usuario } = req.body; // <- salaId enviado desde frontend
         const result = await detalleReporteService.insertarDetalleReporte(detalleReporte);
         const resultado = await detalleReporteService.obtenerDetalleProductoServiceBySku(result.sku, result.tim);
 
         // Emitir a todos en la sala excepto al emisor
         req.io.to(salaId).except(socketId).emit('producto-agregado', resultado);
-        
+
         return res.status(201).json({
             message: 'Detalle del reporte insertado con éxito',
             resultado: resultado
@@ -115,8 +115,9 @@ const obtenerDetallesConProducto = async (req, res) => {
 
 const updateRecibidos = async (req, res) => {
     try {
+        const usuario = req.usuario._id; // Obtener el ID del usuario autenticado
         const { id, uRecibidas, socketId, salaId } = req.body
-        const result = await detalleReporteService.updateRecibidos(id, uRecibidas)
+        const result = await detalleReporteService.updateRecibidos(id, uRecibidas, usuario)
 
         if (!result) {
             return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
@@ -132,8 +133,9 @@ const updateRecibidos = async (req, res) => {
 
 const updateDatosDetalle = async (req, res) => {
     try {
+        const usuario = req.usuario._id; // Obtener el ID del usuario autenticado
         const { id, uRecibidas, fechavencimiento, socketId, salaId } = req.body
-        const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento);
+        const result = await detalleReporteService.updateDatos(id, uRecibidas, fechavencimiento, usuario);
 
         if (!result) {
             return res.status(404).json({ mensaje: '❌ No se encontró el reporte con ese ID' });
@@ -157,24 +159,42 @@ const obtenerDetalleProducto = async (req, res) => {
         return res.status(500).json({ mensaje: 'Error al obtener los detalles con información de productos' });
     }
 };
+const actualizarDetallePorSkus = async (req, res) => {
+    try {
+        const { skus } = req.body;
 
+        if (!Array.isArray(skus) || skus.length === 0) {
+            return res.status(400).json({ mensaje: 'Debe enviar una lista de SKUs válida.' });
+        }
+
+        const resultado = await detalleReporteService.actualizarProductosPorSkus(skus);
+
+        res.status(200).json({
+            mensaje: 'Productos actualizados correctamente.',
+            modificados: resultado.modifiedCount || resultado.nModified // según tu versión de Mongoose
+        });
+    } catch (error) {
+        console.error('Error al actualizar productos:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
 const obtenerDetalleProductosBySkuYMotivo = async (req, res) => {
     try {
         const { sku, motivo } = req.body;
-        console.log(sku, motivo)
+
         const tims = await reporteService.buscarReportePorMotivo(motivo); // deber ser un array de tims
-        console.log(tims);
+
         if (!Array.isArray(tims) || tims.length === 0) {
             return res.status(404).json({ mensaje: 'No hay TIMs para ese motivo' });
         }
 
         const detalles = await detalleReporteService.obtenerDetalleProductoServiceBySkuYTims(sku, tims);
-        console.log(detalles);
+
         if (!detalles || detalles.length === 0) {
             return res.status(404).json({ mensaje: 'Detalle no encontrado' });
         }
 
-        return res.status(204).json(detalles);
+        return res.status(200).json({ respuesta: detalles });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ mensaje: 'Error al obtener el producto' });
@@ -199,6 +219,7 @@ const deleteDetalleReporte = async (req, res) => {
 module.exports = {
     insertarDetalleReporte,
     insertarLoteReporte,
+    actualizarDetallePorSkus,
     updateRecibidos,
     updateDatosDetalle,
     deleteDetalleReporte,

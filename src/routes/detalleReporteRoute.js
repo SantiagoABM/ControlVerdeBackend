@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const detalleReporteController = require('../controllers/detalleReporteController.js');
+const detalleReporteController = require('../controllers/detalleReportesv2.controller.js');
+const { verificarToken } = require('../middlewares/authMiddleware.js');
+
 
 //api/detallereportes
-router.get('/productos/:tim' , detalleReporteController.obtenerDetallesConProducto);
-router.get('/skumotivo' , detalleReporteController.obtenerDetalleProductosBySkuYMotivo);
-
-router.post('/add', detalleReporteController.insertarDetalleReporte);
-router.post('/update', detalleReporteController.updateRecibidos);
-router.post('/updatedr', detalleReporteController.updateDatosDetalle);
-router.post('/lote', detalleReporteController.insertarLoteReporte);
-
-router.delete('/delete/:id' , detalleReporteController.deleteDetalleReporte);
+router.get('/productos/:tim', verificarToken, detalleReporteController.obtenerDetallesConProducto);
+router.get('/skumotivo', verificarToken, detalleReporteController.obtenerDetalleProductosBySkuYMotivo);
+router.post('/add', verificarToken, detalleReporteController.insertarDetalleReporte);
+router.post('/update', verificarToken, detalleReporteController.updateRecibidos);
+router.post('/updatedr', verificarToken, detalleReporteController.updateDatosDetalle);
+router.post('/lote', verificarToken, detalleReporteController.insertarLoteReporte);
+router.post('/delete/:id', verificarToken, detalleReporteController.deleteDetalleReporte);
+router.post('/estado-edicion', verificarToken, detalleReporteController.cambiarEstadoEdicion);
 
 module.exports = router;

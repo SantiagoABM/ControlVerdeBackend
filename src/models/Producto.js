@@ -11,12 +11,18 @@ const productoSchema = new mongoose.Schema({
   descripcion: { type: String, default: '' },
   marca: { type: String, default: '' },
   proveedor: { type: String, default: '' },
-  casePack: { type: Number, default: 0 },
+  casePack: { type: Number, default: 1 },
   costoPromedio: { type: Number, default: 0 },
   precioVigente: { type: Number, default: 0 },
   uMedida: { type: String, default: '' },
+  isContable:{type: Boolean, default: false},
+  precioInv: { type: Number, default: 0 },
+  detalle: String,
+  marcaSensible: {type: Boolean, default: false}
 }, {
   timestamps: true
 });
+
+productoSchema.index({ sku: 1, ean: 1, subdpto: 1 });
 
 module.exports = mongoose.model('Producto', productoSchema);

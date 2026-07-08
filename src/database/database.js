@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
+const config = require('../config');
 
-const uri = "mongodb+srv://barbozamujica109:tysonryx123@tottus.tvsqbky.mongodb.net/controlverde?retryWrites=true&w=majority&appName=Tottus";
+const uri = config.MONGOURI;
 
 mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-  .then(() => console.log("✅ Conectado a MongoDB Atlas"))
-  .catch((err) => console.error("❌ Error conectando a MongoDB:", err));
+  .then(() => console.log("✅ Conectado a Base de Datos" ))
+  .catch((err) => console.error("❌ Error conectando a Base de Datos:", err));
 
 
 

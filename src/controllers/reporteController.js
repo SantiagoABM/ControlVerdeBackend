@@ -55,18 +55,34 @@ const eliminarReporteyDetalles = async (req, res) => {
     try {
         const fechaExpiracion = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); // 2 días
 
-        // En vez de borrar, marcamos para expiración
         await detalleReporteService.marcarDetallesParaExpiracion(tim, fechaExpiracion);
         await reporteService.marcarReporteParaExpiracion(tim, fechaExpiracion);
 
-        return res.status(200).json({
-            message: 'Reporte y detalles serán eliminados en 2 días'
+        res.status(200).json({
+            success: ENUMS.SUCCESS,
+            message: 'Reporte y detalles serán eliminados en 2 días',
+            
+            datos: null
         });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        res.status(400).json({
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null
+        });
     }
 };
 
+const buscarPorFechas = async (req, res) => {
+    try {
+        const { fechaInicio, fechaFin } = req.query;
+        const resultados = await reporteService.buscarReportePorFechas(fechaInicio, fechaFin);
+        return res.status(200).json(resultados);
+    }
+    catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+};
 
 // const eliminarReporteyDetalles = async (req, res) => {
 //     const { tim } = req.params;
