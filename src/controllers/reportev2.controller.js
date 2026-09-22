@@ -107,9 +107,9 @@ const buscarPorMotivov2 = async (req, res) => {
 const buscarPorMotivov3 = async (req, res) => {
     try {
         const { motivo } = req.query;
-        const { nombres} = req.usuario.nombres;
+        const { nombres, rol } = req.usuario;
 
-        const resultados = await reporteService.buscarReportePorMotivov3(motivo, nombres);
+        const resultados = await reporteService.buscarReportePorMotivov3(motivo, nombres, rol);
         if (resultados.length === 0) {
             return res.status(200).json({
                 success: ENUMS.SUCCESS,
