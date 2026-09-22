@@ -108,6 +108,8 @@ const buscarPorMotivov3 = async (req, res) => {
     try {
         const { motivo } = req.query;
         const { nombres, rol } = req.usuario;
+        console.log(nombres)
+        console.log(rol)
 
         const resultados = await reporteService.buscarReportePorMotivov3(motivo, nombres, rol);
         if (resultados.length === 0) {
