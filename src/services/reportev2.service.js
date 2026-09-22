@@ -29,6 +29,21 @@ async function buscarReportePorMotivov2(motivo) {
     return reportes;
 }
 
+async function buscarReportePorMotivov3(motivo, nombres) {
+    if (!motivo) throw new Error('Motivo requerido');
+    if (motivo == 'NSG') {
+        const reportes = await Reporte.find(
+            { motivo: motivo, estado: true, creadoPor: nombres }
+        );
+        return reportes;
+    } else {
+        const reportes = await Reporte.find(
+            { motivo: motivo, estado: true }
+        );
+        return reportes;
+    }
+}
+
 async function buscarReportesAvanzado(filtros) {
     const {
         motivo,
@@ -157,5 +172,6 @@ module.exports = {
     buscarReportePorMotivov2,
     buscarReporte,
     marcarReporteParaExpiracion,
-    desMarcarReporteParaExpiracion
+    desMarcarReporteParaExpiracion,
+    buscarReportePorMotivov3
 };

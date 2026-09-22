@@ -104,6 +104,35 @@ const buscarPorMotivov2 = async (req, res) => {
     }
 };
 
+const buscarPorMotivov3 = async (req, res) => {
+    try {
+        const { motivo } = req.query;
+        const { nombres} = req.usuario.nombres;
+
+        const resultados = await reporteService.buscarReportePorMotivov3(motivo, nombres);
+        if (resultados.length === 0) {
+            return res.status(200).json({
+                success: ENUMS.SUCCESS,
+                message: 'No se encontraron reportes con el motivo especificado',
+
+                datos: []
+            });
+        }
+        return res.status(200).json({
+            success: ENUMS.SUCCESS,
+            message: 'Reportes encontrados con éxito',
+
+            datos: resultados
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: ENUMS.ERROR,
+            message: error.message,
+            datos: null
+        });
+    }
+};
+
 
 const buscarReporte = async (req, res) => {
     const { tim } = req.params;
@@ -275,5 +304,6 @@ module.exports = {
     buscarPorFechas,
     eliminarReporteyDetalles,
     buscarReportesPorFiltros,
-    reactivarTim
+    reactivarTim,
+    buscarPorMotivov3
 };
