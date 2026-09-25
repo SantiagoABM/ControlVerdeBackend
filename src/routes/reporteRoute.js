@@ -5,7 +5,8 @@ const { verificarToken } = require('../middlewares/authMiddleware.js');
 
 // POST /api/reportes
 router.get('/buscar', verificarToken, reporteController.buscarPorMotivo);
-router.get('/buscarv2', verificarToken, reporteController.buscarPorMotivov2);
+// router.get('/buscarv2', verificarToken, reporteController.buscarPorMotivov2);
+router.get('/buscarv2', verificarToken, reporteController.buscarPorMotivov3);
 router.get('/reporte/:tim', verificarToken, reporteController.buscarReporte);
 router.post('/add', verificarToken, reporteController.insertarReporte);
 router.post('/filtros', verificarToken, reporteController.buscarReportesPorFiltros);

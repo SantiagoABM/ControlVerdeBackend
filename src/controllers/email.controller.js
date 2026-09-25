@@ -3,7 +3,7 @@ const emailService = require("../services/email.service.js");
 const enviarRecordatorio = async (req, res) => {
     try {
         const resultado = await emailService.enviarCorreo({
-            para: "alvaro.meza1510@gmail.com",
+            para: ["santiagoroyale109@gmail.com"],
             asunto: "RECORDATORIO SEMANAL BITÁCORA",
             texto: "No te olvides de ingresar a la plataforma para descargar la bitácora semanal.",
             html: `<!DOCTYPE html>
@@ -25,7 +25,7 @@ const enviarRecordatorio = async (req, res) => {
                                     </p>
                                     
                                     <!-- Botón Verde -->
-                                    <a href="https://micontrol.netlify.app/auth" 
+                                    <a href="https://icontrolnext.vercel.app/auth?redirectTo=%2Fhome" 
                                        style="display: inline-block; 
                                               background-color: #28a745; 
                                               color: #ffffff; 
@@ -40,7 +40,7 @@ const enviarRecordatorio = async (req, res) => {
                                     
                                     <p style="color: #999999; font-size: 14px; margin-top: 30px;">
                                         Si no puedes hacer clic en el botón, copia y pega este enlace en tu navegador:<br>
-                                        <a href="https://micontrol.netlify.app/auth" style="color: #28a745;">https://micontrol.netlify.app/auth</a>
+                                        <a href="https://icontrolnext.vercel.app/auth?redirectTo=%2Fhome" style="color: #28a745;">https://icontrolnext.vercel.app/auth?redirectTo=%2Fhome</a>
                                     </p>
                                 </td>
                             </tr>

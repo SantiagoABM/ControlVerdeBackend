@@ -22,7 +22,7 @@ transporter.verify((error, success) => {
 async function enviarCorreo({ para, asunto, texto, html }) {
     try {
         const info = await transporter.sendMail({
-            from: `Mi Control<${process.env.EMAIL_FROM}>`,
+            from: `IControl<${process.env.EMAIL_FROM}>`,
             to: para, // puede ser un string o un array
             subject: asunto,
             text: texto, // versión texto plano
